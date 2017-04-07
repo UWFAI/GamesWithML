@@ -1,12 +1,12 @@
 package io.github.uwfai.othello;
 
-import static org.junit.Assert.*;
 
-import org.junit.Test;
+
+
 
 public class BoardTest {
 	Board board = new Board();
-	@Test
+
 	public void test() {
 		
 		
@@ -17,7 +17,7 @@ public class BoardTest {
 	{
 		board.reset();
 	}
-	@Test
+
 	public void testGetPlayerWithIndex()
 	{
 		//board.reset();

@@ -8,7 +8,7 @@ public class Game
    private ComputerMove computer=null;
    private boolean tie=false;
    private boolean winner=false;
-   private io.github.uwfai.othello.Player gameWinner;
+   private Player gameWinner;
 
    public Game(TicTacToeUI ticTacToeUI)
    {
@@ -28,10 +28,10 @@ public class Game
    {
       this.tie=tie;
    }
-   public void setWinner(boolean winner, Player player)
+   public void setWinner(boolean winner, Player player1)
    {
       this.winner=winner;
-      gameWinner = player;
+      gameWinner = player1;
    }
    public Player getGameWinner()
    {
