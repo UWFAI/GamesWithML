@@ -303,7 +303,6 @@ public class ComputerMove
             bm.append(p == Player.X ? 1 : (p == Player.O ? -1 : 0));
          }
       }
-      // >:(
       for (int n = 0; n < 8; ++n) {
          File f = new File("data.txt");
          try
