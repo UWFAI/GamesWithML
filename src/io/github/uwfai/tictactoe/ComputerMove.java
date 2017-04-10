@@ -304,7 +304,6 @@ public class ComputerMove
          }
       }
       for (int n = 0; n < 8; ++n) {
-         // output to file
          File f = new File("data.txt");
          try
          {
