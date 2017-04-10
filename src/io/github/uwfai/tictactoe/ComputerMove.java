@@ -1,12 +1,65 @@
 package io.github.uwfai.tictactoe;
+import io.github.uwfai.neural.Matrix;
+import io.github.uwfai.neural.NeuralNetwork;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ComputerMove
 {
 
+   double eta = 1.0;
+   double lambda = 0.001;
+   NeuralNetwork.ActivationType at = NeuralNetwork.ActivationType.SIGMOID;
+   NeuralNetwork.CostType ct = NeuralNetwork.CostType.CROSSENTROPY;
+   NeuralNetwork.InitializeType it = NeuralNetwork.InitializeType.SMART;
    private boolean computerTurn=true;
+   private NeuralNetwork NN0 = new NeuralNetwork()
+         .Input(9)
+         .Feedforward(3)
+         .Output(1)
+         .Build(eta, lambda, ct, at, it);
+   private NeuralNetwork NN1 = new NeuralNetwork()
+         .Input(9)
+         .Feedforward(3)
+         .Output(1)
+         .Build(eta, lambda, ct, at, it);
+   private NeuralNetwork NN2 = new NeuralNetwork()
+         .Input(9)
+         .Feedforward(3)
+         .Output(1)
+         .Build(eta, lambda, ct, at, it);
+   private NeuralNetwork NN3 = new NeuralNetwork()
+         .Input(9)
+         .Feedforward(3)
+         .Output(1)
+         .Build(eta, lambda, ct, at, it);
+   private NeuralNetwork NN4 = new NeuralNetwork()
+         .Input(9)
+         .Feedforward(3)
+         .Output(1)
+         .Build(eta, lambda, ct, at, it);
+   private NeuralNetwork NN5 = new NeuralNetwork()
+         .Input(9)
+         .Feedforward(3)
+         .Output(1)
+         .Build(eta, lambda, ct, at, it);
+   private NeuralNetwork NN6 = new NeuralNetwork()
+         .Input(9)
+         .Feedforward(3)
+         .Output(1)
+         .Build(eta, lambda, ct, at, it);
+   private NeuralNetwork NN7 = new NeuralNetwork()
+         .Input(9)
+         .Feedforward(3)
+         .Output(1)
+         .Build(eta, lambda, ct, at, it);
+   private NeuralNetwork NN8 = new NeuralNetwork()
+         .Input(9)
+         .Feedforward(3)
+         .Output(1)
+         .Build(eta, lambda, ct, at, it);
 
    public ComputerMove()
    {
@@ -242,6 +295,41 @@ public class ComputerMove
       int xNew =temp[0];
       int yNew =temp[1];
       board.setBoard(player,xNew,yNew);
+
+      Matrix bm = new Matrix();
+      for (int x = 0; x < 2; ++x) {
+         for (int y = 0; y < 2; ++y) {
+            Player p = board.getValueAtSquare(x, y);
+            bm.append(p == Player.X ? 1 : (p == Player.O ? -1 : 0));
+         }
+      }
+      for (int n = 0; n < 8; ++n) {
+         // output to file
+         File f = new File("data.txt");
+         try
+         {
+            PrintWriter pf = new PrintWriter(f);
+            pf.append(n+"["+bm.print()+","+((xNew*3)+yNew == n ? new Matrix(1) : new Matrix(0)).print()+"]\n");
+         }
+         catch (Exception x)
+         {
+
+         }
+      }
+
+
+      /*
+      Matrix answer = NN0.feedforward(board);
+      Matrix answer = NN0.feedword(board);
+      Matrix answer = NN0.feedword(board);
+      Matrix answer = NN0.feedword(board);
+      Matrix answer = NN0.feedword(board);
+      Matrix answer = NN0.feedword(board);
+      Matrix answer = NN0.feedword(board);
+      Matrix answer = NN0.feedword(board);
+      Matrix answer = NN0.feedword(board);
+      max(0, ..., 8);
+       */
 
    }
    public boolean makeMove(Player player, Board board)

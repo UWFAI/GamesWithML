@@ -1,6 +1,8 @@
 package io.github.uwfai.tictactoe;
 
 import io.github.uwfai.tictactoe.Game;
+import io.github.uwfai.tictactoe.Player;
+
 public class Game
 {
    private TicTacToeUI gui;
