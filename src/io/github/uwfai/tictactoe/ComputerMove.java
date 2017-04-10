@@ -1,7 +1,11 @@
 package io.github.uwfai.tictactoe;
 
+import java.io.File;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+
+import io.github.uwfai.neural.Matrix;
 
 public class ComputerMove
 {
@@ -242,6 +246,23 @@ public class ComputerMove
       int xNew =temp[0];
       int yNew =temp[1];
       board.setBoard(player,xNew,yNew);
+      
+      Matrix bm = new Matrix();
+      for (int x = 0; x < 2; ++x) {
+    	  for (int y = 0; y < 2; ++y) {
+    		  Player p = board.getValueAtSquare(x,  y);
+    		  bm.append(p == Player.X ? 1 : (p == Player.O ? -1 : 0));
+    	  }
+      }
+      for (int n = 0; n < 8; ++n) {
+    	  File f = new File("data.txt");
+    	  try {
+    		  PrintWriter pf = new PrintWriter(f);
+    		  pf.append(n+"["+bm.print()+","+((xNew*3)+yNew == n ? new Matrix(1) : new Matrix(0)).print()+"]\n");
+    	  } catch (Exception e) {
+    		  
+    	  }
+      }
 
    }
    public boolean makeMove(Player player, Board board)
