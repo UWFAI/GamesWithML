@@ -1,4 +1,4 @@
-package GameController;
+package io.github.uwfai.controller;
 
 public class GamesController {
 

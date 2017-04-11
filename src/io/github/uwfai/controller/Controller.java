@@ -1,4 +1,4 @@
-package GameController;
+package io.github.uwfai.controller;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
