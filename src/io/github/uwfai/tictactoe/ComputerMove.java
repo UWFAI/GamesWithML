@@ -11,7 +11,7 @@ public class ComputerMove
 {
 
    private boolean computerTurn=true;
-
+   private int num;
    public ComputerMove()
    {
    }
