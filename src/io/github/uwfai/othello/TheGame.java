@@ -1,11 +1,18 @@
 package io.github.uwfai.othello;
 
+import java.awt.Panel;
+
+import javax.swing.JPanel;
+
 public class TheGame
 {
 	Board board = new Board();
 	OthelloUI display = new GameDisplay();
 	RefGame ref = new RefGame(board);
-	
+	public JPanel frame()
+	{
+		return display.allPanel();
+	}
 	public void playGame()
 	{
 		while(!ref.gameOver())

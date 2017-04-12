@@ -1,5 +1,7 @@
 package io.github.uwfai.othello;
 
+import javax.swing.JPanel;
+
 public interface OthelloUI
 {
 	public void print(Board board, int[] numberOfMoves);
@@ -17,4 +19,5 @@ public interface OthelloUI
 	public void setIsClick(boolean click);
 	public void errorSpaceMessage();
 	public void errorOutMessage();
+	public JPanel allPanel();
 }

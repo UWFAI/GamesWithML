@@ -115,7 +115,7 @@ public class TicTacToeStarter
    }
    public static void main(String[] args)
    {
-	  TicTacToeStarter start = new TicTacToeStarter();
+	 // TicTacToeStarter start = new TicTacToeStarter();
 
    }
 }

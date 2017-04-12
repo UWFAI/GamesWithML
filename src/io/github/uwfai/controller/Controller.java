@@ -111,6 +111,9 @@ public class Controller {
 	         }
 	         else
 	         {
+	       // 	  new SecondFrame().setVisible(true);
+	       // 	    FirstFrame.this.dispose();
+	        	    
 	        	 TicTacToeStarter start = new TicTacToeStarter();
 	         }
 	         System.out.println(newValue+"------");
