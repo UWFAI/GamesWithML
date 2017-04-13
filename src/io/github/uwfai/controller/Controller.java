@@ -23,7 +23,7 @@ import io.github.uwfai.tictactoe.TicTacToeStarter;
 public class Controller {
 	private volatile boolean isClick=false;
 	private volatile boolean errorMessage =false;
-	
+
 	private JButton[] gameOption = new JButton[2];
 	private JButton othello = new JButton("Othello");
 	private JButton tictactoe = new JButton("Tictactoe");

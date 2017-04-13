@@ -11,6 +11,18 @@ public class Board
         refreshBoard();
     }
 
+    public Board(Board copy)
+    {
+       player=new Player[ROWS][COLUMNS];
+        for (int y = 0; y < 3; ++y)
+        {
+           for (int x = 0; x < 3; ++x)
+           {
+              this.setBoard(copy.getValueAtSquare(y, x), y, x);
+           }
+        }
+    }
+
     public void refreshBoard()
     {
         for(int i = 0; i< ROWS; i++)

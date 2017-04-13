@@ -1,16 +1,19 @@
 package io.github.uwfai.tictactoe;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
 import io.github.uwfai.neural.Matrix;
+import io.github.uwfai.neural.NeuralNetwork;
 
 public class ComputerMove
 {
 
-   private boolean computerTurn=true;
+   private boolean computerTurn = true;
 
    public ComputerMove()
    {
@@ -245,24 +248,31 @@ public class ComputerMove
       int[] temp =move(player,board);
       int xNew =temp[0];
       int yNew =temp[1];
+
       board.setBoard(player,xNew,yNew);
 
-      Matrix bm = new Matrix();
-      for (int x = 0; x < 2; ++x) {
-         for (int y = 0; y < 2; ++y) {
+      /*Matrix bm = new Matrix();
+      for (int x = 0; x < 3; ++x) {
+         for (int y = 0; y < 3; ++y) {
             Player p = board.getValueAtSquare(x,  y);
             bm.append(p == Player.X ? 1 : (p == Player.O ? -1 : 0));
          }
       }
-      for (int n = 0; n < 8; ++n) {
-         File f = new File("data.txt");
+      for (int n = 0; n < 9; ++n) {
          try {
-            PrintWriter pf = new PrintWriter(f);
-            pf.append(n+"["+bm.print()+","+((xNew*3)+yNew == n ? new Matrix(1) : new Matrix(0)).print()+"]\n");
+            File f = new File("data"+n+".txt");
+            if (!f.exists()) {
+               f.createNewFile();
+            }
+            FileWriter fw = new FileWriter(f, true);
+            BufferedWriter bw = new BufferedWriter(fw);
+            bw.write("["+bm.print()+","+((xNew*3)+yNew == n ? new Matrix(1) : new Matrix(0)).print()+",\n");
+            bw.close();
+            fw.close();
          } catch (Exception e) {
 
          }
-      }
+      }*/
 
    }
    public boolean makeMove(Player player, Board board)
