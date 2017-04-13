@@ -32,13 +32,13 @@ GameGUI extends JPanel implements TicTacToeUI
    {
       setTypePlayer();
 
-      Panel topMessagePanel = new Panel();
+      JPanel topMessagePanel = new JPanel();
       Font font = new Font("", Font.BOLD, 20);
       topMessage.setFont(font);
       topMessage.setForeground(Color.WHITE);
       topMessagePanel.add(topMessage);
 
-      Panel bottomMessagePanel = new Panel();
+      JPanel bottomMessagePanel = new JPanel();
       bottomMessage.setFont(font);
       bottomMessage.setForeground(Color.WHITE);
       bottomMessagePanel.add(bottomMessage);
@@ -46,9 +46,9 @@ GameGUI extends JPanel implements TicTacToeUI
 
 
       JPanel panel = new JPanel(new BorderLayout());
-      panel.setBackground(Color.blue);
+      panel.setBackground(Color.cyan);
 
-      panel.add(topMessagePanel, BorderLayout.NORTH);
+      //panel.add(topMessagePanel, BorderLayout.NORTH);
       panel.add(addButtonToPanel(), BorderLayout.CENTER);
       panel.add(bottomMessagePanel, BorderLayout.SOUTH);
       panel.setSize(900,500);
@@ -57,11 +57,13 @@ GameGUI extends JPanel implements TicTacToeUI
 
       JFrame frame = new JFrame();
 
-      frame.setJMenuBar(this.theMenuBar);
+      //frame.setJMenuBar(this.theMenuBar);
+      //frame.add(theMenuBar);
+      panel.add(theMenuBar, BorderLayout.NORTH);   // Fix. The menu bar has to be in the panel
       frame.add(panel);
 
       frame.setTitle("TicTacTamba");
-      frame.setSize(950, 920);
+      frame.setSize(900, 500);
       frame.setVisible(true);
 
 
@@ -85,10 +87,12 @@ GameGUI extends JPanel implements TicTacToeUI
       else
          bottomMessage = new JLabel(account.toString(0));
    }
-   private Panel addButtonToPanel()
+   private JPanel addButtonToPanel()
    {
-      Panel panel = new Panel();
-      panel.setLayout(new GridLayout(3, 1, 2, 3));
+      JPanel panel = new JPanel();
+
+      JPanel[][] panelHolders = new JPanel[3][3];    // We need panels to add the references to buttons to
+      panel.setLayout(new GridLayout(3, 3, 5, 5));
       Font font = new Font("Courier", Font.BOLD, 90);
       panel.setBackground(Color.magenta);
       int count = 0;
@@ -97,12 +101,15 @@ GameGUI extends JPanel implements TicTacToeUI
          for (int j = 0; j < 3; j++)
          {
             count++;
+            panelHolders[i][j] = new JPanel();
             buttons[i][j] = new JButton("" + count);
-            panel.add(buttons[i][j]);
             buttons[i][j].addActionListener(new ButtonsClick());
-            buttons[i][j].setPreferredSize(new Dimension(145, 140));
+            buttons[i][j].setPreferredSize(new Dimension(75, 75));
             buttons[i][j].setForeground(Color.BLACK);
             buttons[i][j].setFont(font);
+
+            panelHolders[i][j].add(buttons[i][j]); // Add buttons to panel to fill out grid
+            panel.add(panelHolders[i][j]);         // Add reference to panel
 
          }
       }
