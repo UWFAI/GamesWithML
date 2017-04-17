@@ -6,4 +6,5 @@ public interface TicTacToeUI
    int getUserMove(Player player);
    boolean resetGame();
    void setResetGame(boolean reset);
+   public int getLevel();
 }

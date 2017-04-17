@@ -293,8 +293,7 @@ public class ComputerMove
 
    }
 
-   private static int i = 0;
-   public void smartComputerMove(Player player,Board board)
+   public void smartComputerMove(Player player,Board board,int level)
    {
       Matrix bm = new Matrix();
       for (int x = 0; x < 3; ++x) {
@@ -340,11 +339,11 @@ public class ComputerMove
       int yNew =temp[1];
 
       board.setBoard(player,xNew,yNew);*/
-
+      System.out.println(level+"----------------------");
       /*Matrix bm = new Matrix();
       for (int x = 0; x < 3; ++x) {
          for (int y = 0; y < 3; ++y) {
-            Player p = board.getValueAtSquare(x, y);
+            Player p = board.getValueAtSquare(x,  y);
             bm.append(p == Player.X ? 1 : (p == Player.O ? -1 : 0));
          }
       }
@@ -386,11 +385,11 @@ public class ComputerMove
       }*/
 
    }
-   public boolean makeMove(Player player, Board board)
+   public boolean makeMove(Player player, Board board, int level)
    {
       if(computerTurn)
       {
-         smartComputerMove(player,board);
+         smartComputerMove(player,board,level);
          if(board.checkIfWinner(player))
          {
             return true;

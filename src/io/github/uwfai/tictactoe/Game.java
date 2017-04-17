@@ -61,7 +61,7 @@ public class Game
 
    public boolean computerPlayGame(Player player)
    {
-      boolean win=computer.makeMove(player,move.getBoard());
+      boolean win=computer.makeMove(player,move.getBoard(),gui.getLevel());
       return gameStatus(move,player,win);
    }
 

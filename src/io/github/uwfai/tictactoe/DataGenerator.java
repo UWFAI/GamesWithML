@@ -11,6 +11,7 @@ public class DataGenerator
 
    public static void next(Board bm, Player player)
    {
+	   int level=0;
       Player other = (player == Player.X ? Player.O : Player.X);
       for (int y = 0; y < 3; ++y)
       {
@@ -21,7 +22,7 @@ public class DataGenerator
                tm.setBoard(player, y, x);
                if (!tm.checkIfWinner(player))
                {
-                  DataGenerator.cm.smartComputerMove(other, tm);
+                  DataGenerator.cm.smartComputerMove(other, tm,level);
                   if (!tm.checkIfWinner(other))
                   {
                      DataGenerator.next(tm, player);

@@ -6,6 +6,7 @@ public class Main {
 		// TODO Auto-generated method stub
 		// Main entry point
 		TheGame game = new TheGame();
+		
 		game.playGame();
 
 	}

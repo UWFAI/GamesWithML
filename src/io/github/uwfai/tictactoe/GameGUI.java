@@ -16,8 +16,9 @@ GameGUI extends JPanel implements TicTacToeUI
    private volatile int indexOfButtonPressed;
    boolean computerPlayer = true;
    private volatile boolean resetGame = false;
-
-   private JLabel topMessage = new JLabel();
+   private volatile int level =1;
+   private JLabel topMessage = new JLabel("Hello");
+   private JLabel difficulty = new JLabel("Difficulty:");
    private JLabel bottomMessage;
    private JButton[][] buttons = new JButton[3][3];
    public AccountInformation account = new AccountInformation();
@@ -27,47 +28,92 @@ GameGUI extends JPanel implements TicTacToeUI
    private JMenuItem exit = new JMenuItem("Exit");
    private JMenu optionsMenu = new JMenu("Options");
    private JMenuItem vsHuman = new JMenuItem("Human vs Computer");
-
+   JComboBox<String> comboLanguage = new JComboBox<String>();
+   
    public GameGUI()
    {
-      setTypePlayer();
+	   
+	   	  setTypePlayer();
 
-      JPanel topMessagePanel = new JPanel();
-      Font font = new Font("", Font.BOLD, 20);
-      topMessage.setFont(font);
-      topMessage.setForeground(Color.WHITE);
-      topMessagePanel.add(topMessage);
+	      Panel topMessagePanel = new Panel();
+	      Panel topPart = new Panel();
+	      Font font = new Font("", Font.BOLD, 20);
 
-      JPanel bottomMessagePanel = new JPanel();
-      bottomMessage.setFont(font);
-      bottomMessage.setForeground(Color.WHITE);
-      bottomMessagePanel.add(bottomMessage);
-      bottomMessage.setText(account.toString(1));
+	      topMessage.setFont(font);
+	      
+	      topMessage.setForeground(Color.WHITE);
 
+	      topMessagePanel.add(topMessage);
+	      Panel bottomMessagePanel = new Panel();
+	      
+	      bottomMessage.setFont(font);
+	      bottomMessage.setForeground(Color.WHITE);
+	      bottomMessagePanel.add(bottomMessage);
+	      bottomMessage.setText(account.toString(1));
 
-      JPanel panel = new JPanel(new BorderLayout());
-      panel.setBackground(Color.cyan);
-
-      //panel.add(topMessagePanel, BorderLayout.NORTH);
-      panel.add(addButtonToPanel(), BorderLayout.CENTER);
-      panel.add(bottomMessagePanel, BorderLayout.SOUTH);
-      panel.setSize(900,500);
-
-       menuSetter();
-
-      JFrame frame = new JFrame();
-
-      //frame.setJMenuBar(this.theMenuBar);
-      //frame.add(theMenuBar);
-      panel.add(theMenuBar, BorderLayout.NORTH);   // Fix. The menu bar has to be in the panel
-      frame.add(panel);
-
-      frame.setTitle("TicTacTamba");
-      frame.setSize(900, 500);
-      frame.setVisible(true);
+	      JPanel panel = new JPanel(new BorderLayout());
+	      panel.setBackground(Color.blue);
 
 
+	      difficulty.setForeground(Color.WHITE);
+	      difficulty.setFont(font);
+	      
+	      topPart.add(difficulty);
+	      topPart.add(comboLanguage, BorderLayout.NORTH);
+	      topPart.add(topMessagePanel, BorderLayout.CENTER);
+	      comboBox();
+	      panel.add(topPart, BorderLayout.NORTH);
+	      panel.add(addButtonToPanel(), BorderLayout.CENTER);
+	      panel.add(bottomMessagePanel, BorderLayout.SOUTH);
 
+	      panel.setSize(900,500);
+	       menuSetter();
+	      JFrame frame = new JFrame();
+	      frame.setJMenuBar(this.theMenuBar);
+	      frame.add(panel);
+	      frame.setTitle("AIRG Tictactoe");
+
+	      frame.setSize(900, 800);
+	      frame.setVisible(true);
+
+     
+
+   }
+   public int getLevel()
+   {
+	   return level;
+   }
+   public void comboBox()
+   {
+		// add items to the combo box
+		comboLanguage.addItem("Easy");
+		comboLanguage.addItem("Medium");
+		comboLanguage.addItem("Hard");
+		
+	   comboLanguage.addActionListener(new ActionListener() {
+	    	  
+   	    @Override
+   	    public void actionPerformed(ActionEvent event) {
+   	        JComboBox<String> combo = (JComboBox<String>) event.getSource();
+   	        String selectedBook = (String) combo.getSelectedItem();
+   	 
+   	        if (selectedBook.equals("Easy")) 
+   	        {
+   	        	level =1;
+   	            System.out.println("Good choice!");
+   	        } 
+   	        if (selectedBook.equals("Medium")) 
+   	        {
+   	        	level = 2;
+   	            System.out.println("Nice pick, too!");
+   	        }
+   	        if (selectedBook.equals("Hard")) 
+   	        {
+   	        	level = 3;
+   	            System.out.println("hard"+level);
+   	        }
+   	    }
+   	});
    }
    public void menuSetter()
    {
@@ -87,35 +133,48 @@ GameGUI extends JPanel implements TicTacToeUI
       else
          bottomMessage = new JLabel(account.toString(0));
    }
-   private JPanel addButtonToPanel()
-   {
-      JPanel panel = new JPanel();
 
-      JPanel[][] panelHolders = new JPanel[3][3];    // We need panels to add the references to buttons to
-      panel.setLayout(new GridLayout(3, 3, 5, 5));
+   private Panel addButtonToPanel()
+
+   {
+
+      Panel panel = new Panel();
+      panel.setLayout(new GridLayout(3, 1, 2, 3));
       Font font = new Font("Courier", Font.BOLD, 90);
       panel.setBackground(Color.magenta);
       int count = 0;
+
       for (int i = 0; i < 3; i++)
+
       {
+
          for (int j = 0; j < 3; j++)
+
          {
+
             count++;
-            panelHolders[i][j] = new JPanel();
+
             buttons[i][j] = new JButton("" + count);
+
+            panel.add(buttons[i][j]);
+
             buttons[i][j].addActionListener(new ButtonsClick());
-            buttons[i][j].setPreferredSize(new Dimension(75, 75));
+
+            buttons[i][j].setPreferredSize(new Dimension(145, 140));
+
             buttons[i][j].setForeground(Color.BLACK);
+
             buttons[i][j].setFont(font);
 
-            panelHolders[i][j].add(buttons[i][j]); // Add buttons to panel to fill out grid
-            panel.add(panelHolders[i][j]);         // Add reference to panel
+
 
          }
-      }
-      return panel;
-   }
 
+      }
+
+      return panel;
+
+   }
    public  int doYouWantToPlayAgain(String message)
    {
       topMessage.setText(message);
@@ -146,23 +205,23 @@ GameGUI extends JPanel implements TicTacToeUI
    @Override public int getUserMove(Player player)
    {
 
-
+	   String say ="Who's Playing: ";
       if(computerPlayer)
       {
          bottomMessage.setText(account.toString(1));
          if(player==Player.O)
-            topMessage.setText("AI-"+player.getColor() + " turn.");
+            topMessage.setText(say+"AI-"+player.getColor() + " turn.");
          else
-            topMessage.setText("You"+"-"+player.getColor() + " turn.");
+            topMessage.setText(say+"You"+"-"+player.getColor() + " turn.");
 
       }
       else
       {
          bottomMessage.setText(account.toString(0));
          if(player==Player.O)
-            topMessage.setText("Guest-"+player.getColor() + " turn.");
+            topMessage.setText(say+"Guest-"+player.getColor() + " turn.");
          else
-            topMessage.setText("You"+"-"+player.getColor() + " turn.");
+            topMessage.setText(say+"You"+"-"+player.getColor() + " turn.");
 
       }
       while (!buttonPressed && !resetGame)

@@ -24,6 +24,7 @@ public class Controller {
 	private volatile boolean isClick=false;
 	private volatile boolean errorMessage =false;
 
+
 	private JButton[] gameOption = new JButton[2];
 	private JButton othello = new JButton("Othello");
 	private JButton tictactoe = new JButton("Tictactoe");
@@ -110,6 +111,9 @@ public class Controller {
 	         }
 	         else
 	         {
+	       // 	  new SecondFrame().setVisible(true);
+	       // 	    FirstFrame.this.dispose();
+	        	    
 	        	 TicTacToeStarter start = new TicTacToeStarter();
 	         }
 	         System.out.println(newValue+"------");
