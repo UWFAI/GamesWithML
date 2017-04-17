@@ -1,8 +1,14 @@
 package io.github.uwfai.neural;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Random;
-
+import com.google.gson.*;
+import com.google.gson.annotations.SerializedName;
+import com.google.gson.reflect.TypeToken;
 
 /**
 * NeuralNetwork library
@@ -26,30 +32,34 @@ public class NeuralNetwork {
 	*/
 	
 	public static enum CostType { QUADRATIC, CROSSENTROPY };
-	public static enum ActivationType { SIGMOID };
+	public static enum ActivationType { SIGMOID, RELU };
 	public static enum InitializeType { DUMB, SMART };
 	public static enum RegularizationType { NONE, L2 };
 	
-	private interface CostFunction {
-		public double fn(Matrix y, Matrix a);
-		public Matrix delta(Matrix y, Matrix a);
+	private class CostFunction {
+		public double fn(Matrix y, Matrix a) { return 0.0d; }
+		public Matrix delta(Matrix y, Matrix a) { return new Matrix(0.0d); }
+      public CostFunction() { }
 	}
 	
-	private interface ActivationFunction {
-		public double fn(double z);
-		public double prime(double z);
+	private class ActivationFunction {
+		public double fn(double z) { return 0.0d; }
+		public double prime(double z) { return 0.0d; }
+      public ActivationFunction() { }
 	}
 	
-	private interface InitializeFunction {
-		public double weight(Random gen, int n);
-		public double bias(Random gen, int n);
+	private class InitializeFunction {
+		public double weight(Random gen, int n) { return 0.0d; }
+		public double bias(Random gen, int n) { return 0.0d; }
+      public InitializeFunction() { }
 	}
 	
-	private interface RegularizationFunction {
-		public double reg(Matrix weights);
-		public Matrix dv(Matrix weights);
+	private class RegularizationFunction {
+		public double reg(Matrix weights) { return 0.0d; }
+		public Matrix dv(Matrix weights) { return new Matrix(0.0d); }
+      public RegularizationFunction() { }
 	}
-	
+
 	
 	/*
 	* The Layer interface provides the requirements for any kind of layer in our network. At
@@ -58,14 +68,16 @@ public class NeuralNetwork {
 	* such highly innovative and engineered networks. Focus just on these for now.
 	*/
 	
-	private interface Layer {
+	/*private interface Layer {
 		public Matrix feedforward(Matrix activations, ActivationFunction activation, Matrix zs, Matrix as);
 		public int size();
 		public int[] dimensions();
 		public void initialize(InitializeFunction init, Layer previous, Random gen, int n);
 		public Matrix getWeights();
+		public Matrix getBiases();
+		public String json();
 		public void update(Matrix nabla_b, Matrix nabla_w, double eta, double lambda, int n, int v);
-	}
+	}*/
 	
 	/*
 	* To implement our interface, we have the default functions defined here. They are fairly
@@ -90,7 +102,7 @@ public class NeuralNetwork {
 			return dim;
 		}
 		
-		public void initialize(InitializeFunction init, Layer previous, Random gen, int n) {
+		public void initialize(InitializeFunction init, LayerClass previous, Random gen, int n) {
 			this.biases = new Matrix();
 			this.weights = new Matrix();
 			for (int neuron = 0; neuron < this.size(); ++neuron) {
@@ -106,6 +118,8 @@ public class NeuralNetwork {
 		public Matrix getWeights() {
 			return new Matrix(this.weights);
 		}
+
+		public Matrix getBiases() { return new Matrix(this.biases); }
 		
 		public Matrix feedforward(Matrix activations, ActivationFunction activation, Matrix zs, Matrix as) {
 			Matrix result = new Matrix();
@@ -134,13 +148,27 @@ public class NeuralNetwork {
 				);
 			}
 		}
+
+		public void check() {
+         this.weights.check();
+      }
+
+		public String json() {
+         Gson gson = new Gson();
+         return gson.toJson(this);
+		}
 		
 		LayerClass(int width, int height) {
 			this.width = width;
 			this.height = height;
 		}
-	}	
-	
+	}
+
+   private class LayerClassInstanceCreator implements InstanceCreator<LayerClass> {
+      public LayerClass createInstance(Type type) {
+         return new LayerClass(1, 1);
+      }
+   }
 	
 	/*
 	* The feeforward layer is the core part of our neural networks. Feedforward layers do exactly
@@ -150,11 +178,17 @@ public class NeuralNetwork {
 	* defined by the user with the constructor Layer(height).
 	*/
 	
-	private class FeedforwardLayer extends LayerClass implements Layer {		
+	private class FeedforwardLayer extends LayerClass {
 		FeedforwardLayer(int height) {
 			super(1, height);
 		}
 	}
+
+   private class FeedforwardLayerCreator implements InstanceCreator<FeedforwardLayer> {
+      public FeedforwardLayer createInstance(Type type) {
+         return new FeedforwardLayer(1);
+      }
+   }
 	
 	/*
 	* TODO: convolutional neural network layers. The implementation is simple: for each grid of
@@ -165,13 +199,13 @@ public class NeuralNetwork {
 	* networks. Generally, we won't update the filter/lens of our CNN automatically.
 	*/
 	
-	private class ConvolutionalLayer extends LayerClass implements Layer {		
+	private class ConvolutionalLayer extends LayerClass {
 		public Matrix feedforward(Matrix activations, ActivationFunction activation, Matrix as, Matrix zs) {
 			
 			return new Matrix();
 		}
 		
-		public void initialize(InitializeFunction init, Layer previous, Random gen, int n) {
+		public void initialize(InitializeFunction init, LayerClass previous, Random gen, int n) {
 			return;
 		}
 		
@@ -192,6 +226,12 @@ public class NeuralNetwork {
 			super(width, height);
 		}
 	}
+
+   private class ConvolutionalLayerCreator implements InstanceCreator<ConvolutionalLayer> {
+      public ConvolutionalLayer createInstance(Type type) {
+         return new ConvolutionalLayer(1, 1);
+      }
+   }
 	
 	/*
 	* The InputLayer is the first layer defined for our network and gives us the functionality of
@@ -201,18 +241,25 @@ public class NeuralNetwork {
 	* layer, but rather pass them along into our Feeforward/Convolutional layers.
 	*/
 	
-	private class InputLayer extends LayerClass implements Layer {	
+	private class InputLayer extends LayerClass {
 		public Matrix feedforward(Matrix activations, ActivationFunction activation, Matrix zs, Matrix as) {
 			as.append(activations);
 			zs.append(activations);
 			return activations;
 		}
 		
-		public void initialize(InitializeFunction init, Layer previous, Random gen, int n) {
+		public void initialize(InitializeFunction init, LayerClass previous, Random gen, int n) {
 			this.weights = new Matrix();
 			this.biases = new Matrix();
 			for (int neuron = 0; neuron < this.size(); ++neuron) {
-				this.weights.append(new Matrix(1.0d));
+				this.weights.append(new Matrix());
+            for (int i = 0; i < this.size(); ++i) {
+               if (neuron == i) {
+                  this.weights.getm(neuron).append(1.0d);
+               } else {
+                  this.weights.getm(neuron).append(0.0d);
+               }
+            }
 				this.biases.append(0.0d);
 			}
 			return;
@@ -226,21 +273,27 @@ public class NeuralNetwork {
 			this(1, height);
 		}
 	}
-	
+
+   private class InputLayerCreator implements InstanceCreator<InputLayer> {
+      public InputLayer createInstance(Type type) {
+         return new InputLayer(1);
+      }
+   }
+
 	/*
 	* The Output layer functions similary to the Feedforward layers, but it must always come last
 	* in your NN because it differentiates for the change in cost due to each output neuron. This
 	* differs from inner layers, and so a special class is necessary. It is linked with the NN
 	* class constructor Output(height).
 	*/
-	
-	private class OutputLayer extends LayerClass implements Layer {		
+
+	private class OutputLayer extends LayerClass {
 		OutputLayer(int height) {
 			super(1, height);
 		}
 	}
-	
-	private class Quadratic implements CostFunction {
+
+	private class Quadratic extends CostFunction {
 		public double fn(Matrix y, Matrix a) {
 			double cost = 0.0;
 			for (int i = 0; i < y.size(); ++i) {
@@ -249,16 +302,16 @@ public class NeuralNetwork {
 			}
 			return cost;
 		}
-		
+
 		public Matrix delta(Matrix y, Matrix a) {
 			return a.subtract(y);
 		}
-		
+
 		Quadratic() {
 			return;
 		}
 	}
-	
+
 	/*private class CrossEntropy implements CostFunction {
 		public double fn(Matrix y, Matrix a) {
 			double cost = 0.0;
@@ -269,22 +322,30 @@ public class NeuralNetwork {
 			return cost;
 		}
 	}*/
-	
-	private class Sigmoid implements ActivationFunction {
+
+	private class Sigmoid extends ActivationFunction {
 		public double fn(double z) {
 			return 1.0/(1.0+Math.exp(-z));
 		}
-		
+
 		public double prime(double z) {
 			return this.fn(z)*(1.0-this.fn(z));
 		}
-		
+
 		Sigmoid() {
 			return;
 		}
 	}
-	
-	private class Dumb implements InitializeFunction {
+
+	private class ReLU extends ActivationFunction {
+      public double fn(double z) { return Math.log(1+Math.exp(z)); }
+
+      public double prime(double z) { return 1.0/(1.0+Math.exp(-z)); }
+
+      ReLU() { return; }
+   }
+
+	private class Dumb extends InitializeFunction {
 		public double weight(Random gen, int n) {
 			return gen.nextDouble()-gen.nextDouble();
 		}
@@ -293,8 +354,8 @@ public class NeuralNetwork {
 			return gen.nextDouble()-gen.nextDouble();
 		}
 	}
-	
-	private class Smart implements InitializeFunction {
+
+	private class Smart extends InitializeFunction {
 		public double weight(Random gen, int n) {
 			return (gen.nextDouble()-gen.nextDouble())/Math.sqrt(n);
 		}
@@ -304,9 +365,11 @@ public class NeuralNetwork {
 		}
 	}
 	
-	private ArrayList<Layer> layers = new ArrayList<Layer>();
+	private ArrayList<LayerClass> layers = new ArrayList<LayerClass>();
 	private CostFunction cost;
 	private ActivationFunction activation;
+   private CostType costtype;
+   private ActivationType actitype;
 	private double eta;
 	private double lambda;
 	private Random gen = new Random();
@@ -319,7 +382,7 @@ public class NeuralNetwork {
 	public void initialize(InitializeFunction init) {
 		int size = this.size();
 		for (int layer = 0; layer < this.layers.size(); ++layer) {
-			Layer prev = this.layers.get(0);
+			LayerClass prev = this.layers.get(0);
 			if (layer > 0) { prev = this.layers.get(layer-1); }
 			this.layers.get(layer).initialize(init, prev, this.gen, size);
 		}
@@ -331,7 +394,7 @@ public class NeuralNetwork {
 	*/
 	
 	public Matrix feedforward(Matrix activations, Matrix zs, Matrix as) {
-		for (Layer layer : this.layers) {
+		for (LayerClass layer : this.layers) {
 			activations = layer.feedforward(activations, this.activation, zs, as);
 		}
 		return activations;
@@ -453,7 +516,7 @@ public class NeuralNetwork {
 	* performs all of the above and gives us how accurate our network is without too much effort.
 	*/
 	
-	public void train(Matrix data, Matrix answers, int epochs, int batchsize) {		
+	public void train(Matrix data, Matrix answers, int epochs, int batchsize) {
 		for (int epoch = 0; epoch < epochs; ++epoch) {
 			Matrix tdata = new Matrix(data);
 			Matrix tadata = new Matrix(answers);
@@ -470,16 +533,73 @@ public class NeuralNetwork {
 			}
 			
 			this.epoch(tdata, tadata, batchsize);
-			
-			double total = 0.0d;			
-			for (int i = 0; i < tdata.size(); ++i) {
-				Matrix a = this.feedforward(tdata.getm(i));
-				total += this.cost.fn(tadata.getm(i), a);
-			}
-			
-			System.out.format("After epoch %d, average cost (%.2f/%d), %.2f\n", epoch, total, tdata.size(), total/(double)tdata.size());
 		}
 	}
+
+	public double evaluate(Matrix data, Matrix answers) {
+      double total = 0.0d;
+      for (int i = 0; i < data.size(); ++i) {
+         Matrix a = this.feedforward(data.getm(i));
+         total += this.cost.fn(answers.getm(i), a);
+      }
+      return total/data.size();
+   }
+
+	public String json() {
+      Gson gson = new Gson();
+      return gson.toJson(this);
+	}
+
+	public void save(String path, boolean append) {
+		try
+		{
+			File f = new File(path);
+         if (!f.exists()) {
+            f.createNewFile();
+         }
+			FileWriter fw = new FileWriter(f, append);
+         BufferedWriter bw = new BufferedWriter(fw);
+         bw.write(this.json());
+         bw.close();
+         fw.close();
+		} catch (Exception e) {
+
+		}
+	}
+
+	public int size() {
+		int num = this.layers.get(0).size();
+		for (int layer = 1; layer < this.layers.size(); ++layer) {
+			num *= this.layers.get(layer).size();
+		}
+		return num;
+	}
+
+	public void setEta(double neta) {
+      this.eta = neta;
+   }
+
+   public void setLambda(double nlambda) {
+      this.lambda = nlambda;
+   }
+
+   public void setCost(CostType ncosttype) {
+      this.costtype = ncosttype;
+      this.Refresh();
+   }
+
+   public void setActivation(ActivationType nactitype) {
+      this.actitype = nactitype;
+      this.Refresh();
+   }
+
+   public double getEta() {
+      return this.eta;
+   }
+
+   public double getLambda() {
+      return this.lambda;
+   }
 	
 	/*
 	* The rest of the functions are what we use on the frontend to define our network. Each network
@@ -501,14 +621,6 @@ public class NeuralNetwork {
 	* order to properly connect to the previous layers. (This is mostly relevant for CNNs - Feedforward
 	* layers do all of the connecting for you.)
 	*/
-	
-	public int size() {
-		int num = this.layers.get(0).size();
-		for (int layer = 1; layer < this.layers.size(); ++layer) {
-			num *= this.layers.get(layer).size();
-		}
-		return num;
-	}
 	
 	public NeuralNetwork(long seed) {
 		this.gen.setSeed(seed);
@@ -560,6 +672,8 @@ public class NeuralNetwork {
 	public NeuralNetwork Build(double eta, double lambda, CostType cost, ActivationType activation, InitializeType init) {
 		this.eta = eta;
 		this.lambda = lambda;
+      this.costtype = cost;
+      this.actitype = activation;
 		switch (cost) {
 			default:
 			case QUADRATIC:
@@ -575,6 +689,11 @@ public class NeuralNetwork {
 				this.activation = new Sigmoid();
 				break;
 			}
+         case RELU:
+         {
+            this.activation = new ReLU();
+            break;
+         }
 		}
 		switch (init) {
 			default:
@@ -591,4 +710,38 @@ public class NeuralNetwork {
 		}
 		return this;
 	}
+
+	public NeuralNetwork Refresh() {
+      switch (this.costtype) {
+      default:
+         case QUADRATIC:
+         {
+            this.cost = new Quadratic();
+            break;
+         }
+      }
+      switch (this.actitype)
+      {
+         default:
+         case SIGMOID:
+         {
+            this.activation = new Sigmoid();
+            break;
+         }
+         case RELU:
+         {
+            this.activation = new ReLU();
+            break;
+         }
+      }
+      for (int l = 0; l < this.layers.size(); ++l) {
+         this.layers.get(l).check();
+      }
+      return this;
+   }
+
+	public NeuralNetwork Load(String JSON) {
+      Gson gson = new Gson();
+      return ((NeuralNetwork)gson.fromJson(JSON, new TypeToken<NeuralNetwork>(){}.getType())).Refresh();
+   }
 }

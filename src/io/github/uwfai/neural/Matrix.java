@@ -1,5 +1,7 @@
 package io.github.uwfai.neural;
 
+import com.google.gson.internal.LinkedTreeMap;
+
 import java.util.ArrayList;
 import java.lang.Exception;
 
@@ -40,12 +42,33 @@ public class Matrix {
 	public String print() {
 		String ret = "Matrix(";
 		for (int p = 0; p < this.size(); ++p) {
-			ret += this.getd(p);
+			if (this.get(p) instanceof Matrix) {
+            ret += this.getm(p).print();
+         } else if (this.get(p) instanceof Double) {
+            ret += this.getd(p);
+         } else {
+            ret += this.get(p).getClass().getName();
+         }
 			if (p < this.size()-1) {
 				ret += ",";
 			}
 		}
 		return ret+")";
+	}
+
+	public String json() {
+		String ret = "[";
+		for (int i = 0; i < this.size(); ++i) {
+			if (this.get(i) instanceof Matrix) {
+				ret += this.getm(i).json();
+			} else {
+				ret += Double.toString(this.getd(i));
+			}
+			if (i < this.size()-1) {
+				ret += ",";
+			}
+		}
+		return ret+"]";
 	}
 	
 	public void remove(int index) {
@@ -80,7 +103,7 @@ public class Matrix {
 				} else if (element instanceof Matrix) {
 					newmatrix.add(((Matrix)element).copy());
 				} else {
-					throw new Exception("unknown type");
+					throw new Exception("unknown type ("+element.getClass().getName()+")");
 				}
 			}
 		} catch (Exception e) {
@@ -268,7 +291,7 @@ public class Matrix {
 				if (this.get(index) instanceof Matrix) {
 					result = (Matrix)this.get(index);
 				} else {
-					throw new Exception("item at index is not matrix");
+					throw new Exception("item at index is not matrix - it's ("+this.get(index).getClass().getName()+")");
 				}
 			} else {
 				throw new Exception("index out of matrix bounds");
@@ -279,7 +302,7 @@ public class Matrix {
 		}
 		return result;
 	}
-	
+
 	public double getd(int index) {
 		double result = 0.0d;
 		try {
@@ -287,7 +310,7 @@ public class Matrix {
 				if (this.get(index) instanceof Double) {
 					result = (double)this.get(index);
 				} else {
-					throw new Exception("item at index is not double");
+					throw new Exception("item at index is not double - it's ("+this.get(index).getClass().getName()+")");
 				}
 			} else {
 				throw new Exception("index out of matrix bounds");
@@ -298,11 +321,36 @@ public class Matrix {
 		}
 		return result;
 	}
+
+	public void insert(int index, Double db) {
+      this.matrix.add(index, db);
+   }
+
+   public void insert(int index, Matrix mx) {
+      this.matrix.add(index, mx);
+   }
+
+	public void check() {
+      for (int index = 0; index < this.size(); ++index) {
+         if (this.get(index) instanceof LinkedTreeMap) {
+            this.insert(index, GsonConvert.convert((LinkedTreeMap)this.get(index)));
+            this.remove(index+1);
+         }
+      }
+	}
 	
 	public Matrix(double... values) {
 		this.matrix = new ArrayList();
 		for (double value : values) {
 			matrix.add(value);
+		}
+	}
+
+	public Matrix (Matrix matrix1, Matrix... matrices) {
+		this.matrix = new ArrayList();
+		this.matrix.add(matrix1);
+		for (Matrix nmatrix : matrices) {
+			this.matrix.add(nmatrix);
 		}
 	}
 	

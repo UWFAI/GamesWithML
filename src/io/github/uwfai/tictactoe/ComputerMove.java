@@ -1,22 +1,72 @@
 package io.github.uwfai.tictactoe;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gson.Gson;
 import io.github.uwfai.neural.Matrix;
 import io.github.uwfai.neural.NeuralNetwork;
 
 public class ComputerMove
 {
 
+   private NeuralNetwork NN0 = new NeuralNetwork();
+   private NeuralNetwork NN1 = new NeuralNetwork();
+   private NeuralNetwork NN2 = new NeuralNetwork();
+   private NeuralNetwork NN3 = new NeuralNetwork();
+   private NeuralNetwork NN4 = new NeuralNetwork();
+   private NeuralNetwork NN5 = new NeuralNetwork();
+   private NeuralNetwork NN6 = new NeuralNetwork();
+   private NeuralNetwork NN7 = new NeuralNetwork();
+   private NeuralNetwork NN8 = new NeuralNetwork();
+
    private boolean computerTurn = true;
 
    public ComputerMove()
    {
+      boolean cont = true;
+      File f;
+      FileReader fr;
+      BufferedReader br;
+      for (int n = 0; n < 9; ++n) {
+         f = new File("NN"+n+".json");
+         cont &= f.exists();
+      }
+      if (cont) {
+         try
+         {
+            ArrayList<NeuralNetwork> NNs = new ArrayList<NeuralNetwork>();
+            NNs.add(NN0);
+            NNs.add(NN1);
+            NNs.add(NN2);
+            NNs.add(NN3);
+            NNs.add(NN4);
+            NNs.add(NN5);
+            NNs.add(NN6);
+            NNs.add(NN7);
+            NNs.add(NN8);
+
+            String json = "";
+
+            for (int n = 0; n < 9; ++n) {
+               f = new File("NN"+n+".json");
+               fr = new FileReader(f);
+               br = new BufferedReader(fr);
+               String line;
+               while ((line = br.readLine()) != null) {
+                  json += line;
+               }
+               br.close();
+               fr.close();
+               NNs.get(n).Load(json);
+            }
+         }
+         catch (Exception e)
+         {
+
+         }
+      }
    }
 
    private int evaluateLine(Player player,Board board,int row1, int col1, int row2, int col2, int row3, int col3)
@@ -243,34 +293,95 @@ public class ComputerMove
 
    }
 
+   private static int i = 0;
    public void smartComputerMove(Player player,Board board)
    {
-      int[] temp =move(player,board);
+      Matrix bm = new Matrix();
+      for (int x = 0; x < 3; ++x) {
+         for (int y = 0; y < 3; ++y) {
+            Player p = board.getValueAtSquare(x, y);
+            bm.append(p == Player.X ? 1 : (p == Player.O ? -1 : 0));
+         }
+      }
+
+      double[] all = {
+        NN0.feedforward(bm).getd(0),
+        NN1.feedforward(bm).getd(0),
+        NN2.feedforward(bm).getd(0),
+        NN3.feedforward(bm).getd(0),
+        NN4.feedforward(bm).getd(0),
+        NN5.feedforward(bm).getd(0),
+        NN6.feedforward(bm).getd(0),
+        NN7.feedforward(bm).getd(0),
+        NN8.feedforward(bm).getd(0)
+      };
+
+      int h = 0;
+      for (int i = 1; i < 9; ++i) {
+         if (all[i] > all[h]) {
+            h = i;
+         }
+      }
+
+      if (board.getValueAtSquare(h%3, h/3) == Player.EMPTY) {
+         board.setBoard(player, h%3, h/3);
+      } else {
+         for (int i = 0; i < 9; ++i) {
+            if (board.getValueAtSquare(i%3, i/3) == Player.EMPTY) {
+               board.setBoard(player, i%3, i/3);
+               System.out.println("AI failed. [used next available move]");
+               break;
+            }
+         }
+      }
+
+      /*int[] temp =move(player,board);
       int xNew =temp[0];
       int yNew =temp[1];
 
-      board.setBoard(player,xNew,yNew);
+      board.setBoard(player,xNew,yNew);*/
 
       /*Matrix bm = new Matrix();
       for (int x = 0; x < 3; ++x) {
          for (int y = 0; y < 3; ++y) {
-            Player p = board.getValueAtSquare(x,  y);
+            Player p = board.getValueAtSquare(x, y);
             bm.append(p == Player.X ? 1 : (p == Player.O ? -1 : 0));
          }
       }
-      for (int n = 0; n < 9; ++n) {
-         try {
-            File f = new File("data"+n+".txt");
-            if (!f.exists()) {
-               f.createNewFile();
-            }
-            FileWriter fw = new FileWriter(f, true);
-            BufferedWriter bw = new BufferedWriter(fw);
-            bw.write("["+bm.print()+","+((xNew*3)+yNew == n ? new Matrix(1) : new Matrix(0)).print()+",\n");
-            bw.close();
-            fw.close();
-         } catch (Exception e) {
+      try {
+         File f = new File("data.txt");
+         if (!f.exists()) {
+            f.createNewFile();
+         }
+         FileWriter fw = new FileWriter(f, true);
+         BufferedWriter bw = new BufferedWriter(fw);
+         bw.write("new "+bm.print()+",\n");
+         bw.close();
+         fw.close();
+      } catch (Exception e) {
 
+      }
+      for (int n = 0; n < 9; ++n) {
+         if ((xNew*3)+yNew == n)
+         {
+            try
+            {
+
+               File f = new File("data" + n + ".txt");
+               if (!f.exists())
+               {
+                  f.createNewFile();
+               }
+               FileWriter fw = new FileWriter(f, true);
+               BufferedWriter bw = new BufferedWriter(fw);
+               bw.write((i++)+", ");
+               bw.close();
+               fw.close();
+            }
+            catch (Exception e)
+            {
+
+            }
          }
       }*/
 
