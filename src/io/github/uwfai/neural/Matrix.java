@@ -36,9 +36,9 @@ public class Matrix {
 		}
 		return newmatrix;
 	}
-	
+
 	public String print() {
-		String ret = "[Matrix(";
+		String ret = "Matrix(";
 		for (int p = 0; p < this.size(); ++p) {
 			ret += this.getd(p);
 			if (p < this.size()-1) {

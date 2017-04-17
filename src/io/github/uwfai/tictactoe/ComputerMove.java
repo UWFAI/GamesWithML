@@ -1,17 +1,25 @@
 package io.github.uwfai.tictactoe;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
 import io.github.uwfai.neural.Matrix;
+import io.github.uwfai.neural.NeuralNetwork;
 
 public class ComputerMove
 {
 
+
    private boolean computerTurn=true;
    private int num;
+
+
+
+
    public ComputerMove()
    {
    }
@@ -82,67 +90,67 @@ public class ComputerMove
       return score;
    }
 
-//   public int score(Board game, int depth, Player player)
-//   {
-//       if(game.checkIfWinner(player))
-//         return 10 - depth;
-//       else if (game.checkIfWinner(player.getOtherColor()))
-//         return depth - 10;
-//         else
-//         return 0;
-//
-//   }
-//   private int[] minimax(int depth, Player player,Board board)
-//   {
-//      // Generate possible next moves in a List of int[2] of {row, col}.
-//      List<int[]> nextMoves = generateMoves(board,player);
-//
-//      // mySeed is maximizing; while oppSeed is minimizing
-//      int bestScore = (player == player.getColor()) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
-//      int currentScore;
-//      int bestRow = -1;
-//      int bestCol = -1;
-//
-//      if (nextMoves.isEmpty() || depth == 0)
-//      {
-//         // Gameover or depth reached, evaluate score
-//         bestScore = evaluate(board,player);
-//         return score(board,depth,player);
-//      }
-//      else
-//      {
-//         for (int[] move : nextMoves)
-//         {
-//            // Try this move for the current "player"
-//            // cells[move[0]][move[1]].content = player;
-//            board.setBoard(player,move[0],move[1] );
-//            if (player == player.getColor())
-//            {  // mySeed (computer) is maximizing player
-//               currentScore = minimax(depth-1, player.getOtherColor(), board)[0];
-//               if (currentScore > bestScore)
-//               {
-//                  bestScore = currentScore;
-//                  bestRow = move[0];
-//                  bestCol = move[1];
-//               }
-//            }
-//            else
-//            {  // oppSeed is minimizing player
-//               currentScore = minimax(depth-1, player.getColor(),board)[0];
-//               if (currentScore < bestScore)
-//               {
-//                  bestScore = currentScore;
-//                  bestRow = move[0];
-//                  bestCol = move[1];
-//               }
-//            }
-//            // Undo move
-//            //cells[move[0]][move[1]].content = player.EMPTY;
-//            board.setBoard(player.EMPTY,move[0],move[1] );
-//         }
-//      }
-//      return new int[] {bestScore, bestRow, bestCol};
-//   }
+   //   public int score(Board game, int depth, Player player)
+   //   {
+   //       if(game.checkIfWinner(player))
+   //         return 10 - depth;
+   //       else if (game.checkIfWinner(player.getOtherColor()))
+   //         return depth - 10;
+   //         else
+   //         return 0;
+   //
+   //   }
+   //   private int[] minimax(int depth, Player player,Board board)
+   //   {
+   //      // Generate possible next moves in a List of int[2] of {row, col}.
+   //      List<int[]> nextMoves = generateMoves(board,player);
+   //
+   //      // mySeed is maximizing; while oppSeed is minimizing
+   //      int bestScore = (player == player.getColor()) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+   //      int currentScore;
+   //      int bestRow = -1;
+   //      int bestCol = -1;
+   //
+   //      if (nextMoves.isEmpty() || depth == 0)
+   //      {
+   //         // Gameover or depth reached, evaluate score
+   //         bestScore = evaluate(board,player);
+   //         return score(board,depth,player);
+   //      }
+   //      else
+   //      {
+   //         for (int[] move : nextMoves)
+   //         {
+   //            // Try this move for the current "player"
+   //            // cells[move[0]][move[1]].content = player;
+   //            board.setBoard(player,move[0],move[1] );
+   //            if (player == player.getColor())
+   //            {  // mySeed (computer) is maximizing player
+   //               currentScore = minimax(depth-1, player.getOtherColor(), board)[0];
+   //               if (currentScore > bestScore)
+   //               {
+   //                  bestScore = currentScore;
+   //                  bestRow = move[0];
+   //                  bestCol = move[1];
+   //               }
+   //            }
+   //            else
+   //            {  // oppSeed is minimizing player
+   //               currentScore = minimax(depth-1, player.getColor(),board)[0];
+   //               if (currentScore < bestScore)
+   //               {
+   //                  bestScore = currentScore;
+   //                  bestRow = move[0];
+   //                  bestCol = move[1];
+   //               }
+   //            }
+   //            // Undo move
+   //            //cells[move[0]][move[1]].content = player.EMPTY;
+   //            board.setBoard(player.EMPTY,move[0],move[1] );
+   //         }
+   //      }
+   //      return new int[] {bestScore, bestRow, bestCol};
+   //   }
 
    private int evaluate(Board board, Player player) {
       int score = 0;
@@ -181,56 +189,56 @@ public class ComputerMove
       }
       return nextMoves;
    }
-      private int[] minimax(int depth, Player player,Board board)
+   private int[] minimax(int depth, Player player,Board board)
+   {
+      // Generate possible next moves in a List of int[2] of {row, col}.
+      List<int[]> nextMoves = generateMoves(board,player);
+
+      // mySeed is maximizing; while oppSeed is minimizing
+      int bestScore = (player == player.getColor()) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+      int currentScore;
+      int bestRow = -1;
+      int bestCol = -1;
+
+      if (nextMoves.isEmpty() || depth == 0)
       {
-         // Generate possible next moves in a List of int[2] of {row, col}.
-         List<int[]> nextMoves = generateMoves(board,player);
-
-         // mySeed is maximizing; while oppSeed is minimizing
-         int bestScore = (player == player.getColor()) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
-         int currentScore;
-         int bestRow = -1;
-         int bestCol = -1;
-
-         if (nextMoves.isEmpty() || depth == 0)
-         {
-            // Gameover or depth reached, evaluate score
-            bestScore = evaluate(board,player);
-         }
-         else
-         {
-            for (int[] move : nextMoves)
-            {
-               // Try this move for the current "player"
-              // cells[move[0]][move[1]].content = player;
-               board.setBoard(player,move[0],move[1] );
-               if (player == player.getColor())
-               {  // mySeed (computer) is maximizing player
-                  currentScore = minimax(depth-1, player.getOtherColor(), board)[0];
-                  if (currentScore > bestScore)
-                  {
-                     bestScore = currentScore;
-                     bestRow = move[0];
-                     bestCol = move[1];
-                  }
-               }
-               else
-               {  // oppSeed is minimizing player
-                  currentScore = minimax(depth-1, player.getColor(),board)[0];
-                  if (currentScore < bestScore)
-                  {
-                     bestScore = currentScore;
-                     bestRow = move[0];
-                     bestCol = move[1];
-                  }
-               }
-               // Undo move
-               //cells[move[0]][move[1]].content = player.EMPTY;
-               board.setBoard(player.EMPTY,move[0],move[1] );
-            }
-         }
-         return new int[] {bestScore, bestRow, bestCol};
+         // Gameover or depth reached, evaluate score
+         bestScore = evaluate(board,player);
       }
+      else
+      {
+         for (int[] move : nextMoves)
+         {
+            // Try this move for the current "player"
+            // cells[move[0]][move[1]].content = player;
+            board.setBoard(player,move[0],move[1] );
+            if (player == player.getColor())
+            {  // mySeed (computer) is maximizing player
+               currentScore = minimax(depth-1, player.getOtherColor(), board)[0];
+               if (currentScore > bestScore)
+               {
+                  bestScore = currentScore;
+                  bestRow = move[0];
+                  bestCol = move[1];
+               }
+            }
+            else
+            {  // oppSeed is minimizing player
+               currentScore = minimax(depth-1, player.getColor(),board)[0];
+               if (currentScore < bestScore)
+               {
+                  bestScore = currentScore;
+                  bestRow = move[0];
+                  bestCol = move[1];
+               }
+            }
+            // Undo move
+            //cells[move[0]][move[1]].content = player.EMPTY;
+            board.setBoard(player.EMPTY,move[0],move[1] );
+         }
+      }
+      return new int[] {bestScore, bestRow, bestCol};
+   }
 
 
    int[] move(Player player,Board board)
@@ -240,36 +248,43 @@ public class ComputerMove
 
    }
 
-  public void smartComputerMove(Player player,Board board)
+   public void smartComputerMove(Player player,Board board,int level)
    {
       int[] temp =move(player,board);
       int xNew =temp[0];
       int yNew =temp[1];
+
       board.setBoard(player,xNew,yNew);
-      
-      Matrix bm = new Matrix();
-      for (int x = 0; x < 2; ++x) {
-    	  for (int y = 0; y < 2; ++y) {
-    		  Player p = board.getValueAtSquare(x,  y);
-    		  bm.append(p == Player.X ? 1 : (p == Player.O ? -1 : 0));
-    	  }
+      System.out.println(level+"----------------------");
+      /*Matrix bm = new Matrix();
+      for (int x = 0; x < 3; ++x) {
+         for (int y = 0; y < 3; ++y) {
+            Player p = board.getValueAtSquare(x,  y);
+            bm.append(p == Player.X ? 1 : (p == Player.O ? -1 : 0));
+         }
       }
-      for (int n = 0; n < 8; ++n) {
-    	  File f = new File("data.txt");
-    	  try {
-    		  PrintWriter pf = new PrintWriter(f);
-    		  pf.append(n+"["+bm.print()+","+((xNew*3)+yNew == n ? new Matrix(1) : new Matrix(0)).print()+"]\n");
-    	  } catch (Exception e) {
-    		  
-    	  }
-      }
+      for (int n = 0; n < 9; ++n) {
+         try {
+            File f = new File("data"+n+".txt");
+            if (!f.exists()) {
+               f.createNewFile();
+            }
+            FileWriter fw = new FileWriter(f, true);
+            BufferedWriter bw = new BufferedWriter(fw);
+            bw.write("["+bm.print()+","+((xNew*3)+yNew == n ? new Matrix(1) : new Matrix(0)).print()+",\n");
+            bw.close();
+            fw.close();
+         } catch (Exception e) {
+
+         }
+      }*/
 
    }
-   public boolean makeMove(Player player, Board board)
+   public boolean makeMove(Player player, Board board, int level)
    {
       if(computerTurn)
       {
-         smartComputerMove(player,board);
+         smartComputerMove(player,board,level);
          if(board.checkIfWinner(player))
          {
             return true;

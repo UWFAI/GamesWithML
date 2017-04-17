@@ -1,10 +1,7 @@
 package io.github.uwfai.neural;
 
-import io.github.uwfai.*;
 import java.awt.image.BufferedImage;
 import java.util.Random;
-import java.util.Date;
-import java.util.Scanner;
 import javax.imageio.ImageIO;
 import java.io.File;
 
@@ -59,7 +56,7 @@ public class Classification {
 				}
 			}
 			try {
-				File output = new File("train-"+i+".png");
+				File output = new File("\\images\\train-"+i+".png");
 				ImageIO.write(bi, "png", output);
 			} catch (Exception e) {
 				e.printStackTrace();

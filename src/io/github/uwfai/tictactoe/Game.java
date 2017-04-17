@@ -1,6 +1,8 @@
 package io.github.uwfai.tictactoe;
 
 import io.github.uwfai.tictactoe.Game;
+import io.github.uwfai.tictactoe.Player;
+
 public class Game
 {
    private TicTacToeUI gui;
@@ -59,7 +61,7 @@ public class Game
 
    public boolean computerPlayGame(Player player)
    {
-      boolean win=computer.makeMove(player,move.getBoard());
+      boolean win=computer.makeMove(player,move.getBoard(),gui.getLevel());
       return gameStatus(move,player,win);
    }
 
