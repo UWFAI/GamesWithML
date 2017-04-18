@@ -59,28 +59,9 @@ public class NeuralNetwork {
 		public Matrix dv(Matrix weights) { return new Matrix(0.0d); }
       public RegularizationFunction() { }
 	}
-
 	
 	/*
-	* The Layer interface provides the requirements for any kind of layer in our network. At
-	* the basic level, we have Feeforward and Convolutional layers; these are what are currently
-	* used in the industry apart from the more disorganied networks like IBM Watson and other
-	* such highly innovative and engineered networks. Focus just on these for now.
-	*/
-	
-	/*private interface Layer {
-		public Matrix feedforward(Matrix activations, ActivationFunction activation, Matrix zs, Matrix as);
-		public int size();
-		public int[] dimensions();
-		public void initialize(InitializeFunction init, Layer previous, Random gen, int n);
-		public Matrix getWeights();
-		public Matrix getBiases();
-		public String json();
-		public void update(Matrix nabla_b, Matrix nabla_w, double eta, double lambda, int n, int v);
-	}*/
-	
-	/*
-	* To implement our interface, we have the default functions defined here. They are fairly
+	* To implement our layers, we have the default functions defined here. They are fairly
 	* basic, but because, specifically, our Feedforward and Output layers share most traits
 	* about how they operate, we define our LayerClass with basic definitions in order to ensure
 	* that the Layer interface is implemented for all layers, even if custom feedforward and
