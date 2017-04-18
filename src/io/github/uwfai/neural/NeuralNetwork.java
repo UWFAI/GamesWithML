@@ -7,7 +7,6 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Random;
 import com.google.gson.*;
-import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
 
 /**
@@ -107,7 +106,7 @@ public class NeuralNetwork {
 			zs.append(new Matrix());
 			as.append(new Matrix());
 			for (int neuron = 0; neuron < this.size(); ++neuron) {
-				double z = activations.hadamard(this.weights.getm(neuron)).sum()+this.biases.getd(neuron);
+				double z = activations.product(this.weights.getm(neuron)).sum()+this.biases.getd(neuron);
 				double a = activation.fn(z);
 				result.append(a);
 				((Matrix)zs.get(zs.size()-1)).append(z);
@@ -276,12 +275,7 @@ public class NeuralNetwork {
 
 	private class Quadratic extends CostFunction {
 		public double fn(Matrix y, Matrix a) {
-			double cost = 0.0;
-			for (int i = 0; i < y.size(); ++i) {
-				double v = (double)0.5*Math.pow(y.getd(i)-a.getd(i),2.0);
-				cost += v;
-			}
-			return cost;
+			return 0.5*y.subtract(a).apply((j) -> Math.pow(j, 2.0d)).sum();
 		}
 
 		public Matrix delta(Matrix y, Matrix a) {
@@ -293,16 +287,15 @@ public class NeuralNetwork {
 		}
 	}
 
-	/*private class CrossEntropy implements CostFunction {
+	private class CrossEntropy extends CostFunction {
 		public double fn(Matrix y, Matrix a) {
-			double cost = 0.0;
-			for (int i = 0; i < y.size(); ++i) {
-				double v = (y.getd(i)*(double)Math.log(a.getd(i)))+((1.0d-y.getd(i))*Math.log(1.0d-a.getd(i)));
-				cost += v;
-			}
-			return cost;
+			return -y.product(a.apply(Math::log)).add(y.shape().fill(1.0d).subtract(y).product(a.shape().fill(1.0d).subtract(a).apply(Math::log))).sum();
 		}
-	}*/
+
+		public Matrix delta(Matrix y, Matrix a) { return y.subtract(a).division(a.product(a.subtract(a.shape().fill(1.0d)))); }
+
+      CrossEntropy() { return; }
+	}
 
 	private class Sigmoid extends ActivationFunction {
 		public double fn(double z) {
@@ -410,13 +403,13 @@ public class NeuralNetwork {
 			for (int neuron = 0; neuron < this.layers.get(layer).size(); ++neuron) {
 				adjust.append(this.activation.prime(zs.getm(layer).getd(neuron)));
 			}
-			error.set(0, error.getm(0).hadamard(adjust));
+			error.set(0, error.getm(0).product(adjust));
 			
 			if (layer > 0) {
 				Matrix result = new Matrix();
 				for (int neuron = 0; neuron < this.layers.get(layer-1).size(); ++neuron) {
 					result.append(error.getm(0)
-							.hadamard(
+							.product(
 								this.layers.get(layer).getWeights().column(neuron)
 							)
 							.sum());
@@ -662,6 +655,11 @@ public class NeuralNetwork {
 				this.cost = new Quadratic();
 				break;
 			}
+         case CROSSENTROPY:
+         {
+            this.cost = new CrossEntropy();
+            break;
+         }
 		}
 		switch (activation) {
 			default:
@@ -694,11 +692,15 @@ public class NeuralNetwork {
 
 	public NeuralNetwork Refresh() {
       switch (this.costtype) {
-      default:
+         default:
          case QUADRATIC:
          {
             this.cost = new Quadratic();
             break;
+         }
+         case CROSSENTROPY:
+         {
+            this.cost = new CrossEntropy();
          }
       }
       switch (this.actitype)

@@ -4,6 +4,9 @@ import com.google.gson.internal.LinkedTreeMap;
 
 import java.util.ArrayList;
 import java.lang.Exception;
+import java.util.concurrent.Callable;
+import java.util.function.DoubleConsumer;
+import java.util.function.Function;
 
 public class Matrix {
 	private ArrayList matrix;
@@ -182,16 +185,18 @@ public class Matrix {
 		return obj;
 	}
 	
-	public Matrix hadamard(Matrix m) {
+	public Matrix product(Matrix m) {
 		Matrix newmatrix = new Matrix();
 		try {
 			if (this.similar(m)) {
 				for (int index = 0; index < this.size(); ++index) {
 					if (this.get(index) instanceof Matrix) {
-						newmatrix.append(((Matrix)this.get(index)).hadamard((Matrix)m.get(index)));
-					} else {
+						newmatrix.append(((Matrix)this.get(index)).product((Matrix)m.get(index)));
+					} else if (this.get(index) instanceof Double){
 						newmatrix.append((double)this.get(index)*(double)m.get(index));
-					}
+					} else {
+                  throw new Exception("unknown type");
+               }
 				}
 			} else {
 				throw new Exception("matrices not the same shape for Hadamard product");
@@ -202,6 +207,29 @@ public class Matrix {
 		}
 		return newmatrix;
 	}
+
+	public Matrix division(Matrix m) {
+      Matrix newmatrix = new Matrix();
+      try {
+         if (this.similar(m)) {
+            for (int index = 0; index < this.size(); ++index) {
+               if (this.get(index) instanceof Matrix) {
+                  newmatrix.append(((Matrix)this.get(index)).product((Matrix)m.get(index)));
+               } else if (this.get(index) instanceof Double) {
+                  newmatrix.append((double)this.get(index)/(double)m.get(index));
+               } else {
+                  throw new Exception("unknown type");
+               }
+            }
+         } else {
+            throw new Exception("matrices not the same shape for Hadamard division");
+         }
+      } catch (Exception e) {
+         System.err.println(String.format("Error performing Hadamard division: %s", e.getMessage()));
+         e.printStackTrace();
+      }
+      return newmatrix;
+   }
 	
 	public double sum() {
 		double total = 0.0d;
@@ -241,6 +269,49 @@ public class Matrix {
 		this.matrix.add(0,value);
 		return this;
 	}
+
+	public Matrix apply(Function<Double,Double> f) {
+      Matrix newmatrix = new Matrix();
+      try {
+         for (int index = 0; index < this.size(); ++index) {
+            if (this.get(index) instanceof Matrix) {
+               newmatrix.append(this.getm(index).apply(f));
+            } else if (this.get(index) instanceof Double) {
+               newmatrix.append(f.apply(this.getd(index)));
+            } else {
+               throw new Exception("unknown type");
+            }
+         }
+      }
+      catch (Exception e)
+      {
+         System.err.println("cannot apply function to matrix: %s".format(e.getMessage()));
+         e.printStackTrace();
+      }
+      return newmatrix;
+   }
+
+	public Matrix fill(double value) {
+      try
+      {
+         for (int index = 0; index < this.size(); ++index)
+         {
+            if (this.get(index) instanceof Matrix) {
+               this.getm(index).fill(value);
+            } else if (this.get(index) instanceof Double) {
+               this.set(index, value);
+            } else {
+               throw new Exception("unknown type");
+            }
+         }
+      }
+      catch (Exception e)
+      {
+         System.err.println("Failed to fill matrix: %s".format(e.getMessage()));
+         e.printStackTrace();
+      }
+      return this;
+   }
 	
 	public Matrix add(Matrix matrix) {
 		Matrix newmatrix = new Matrix();
