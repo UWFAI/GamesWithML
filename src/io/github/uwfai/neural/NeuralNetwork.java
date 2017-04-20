@@ -31,7 +31,7 @@ public class NeuralNetwork {
 	*/
 	
 	public static enum CostType { QUADRATIC, CROSSENTROPY };
-	public static enum ActivationType { SIGMOID, RELU };
+	public static enum ActivationType { SIGMOID, RELU, TANH };
 	public static enum InitializeType { DUMB, SMART };
 	public static enum RegularizationType { NONE, L2 };
 	
@@ -55,7 +55,7 @@ public class NeuralNetwork {
 	
 	private class RegularizationFunction {
 		public double reg(Matrix weights) { return 0.0d; }
-		public Matrix dv(Matrix weights) { return new Matrix(0.0d); }
+		public Matrix dv(Matrix weights) { return weights.shape(); }
       public RegularizationFunction() { }
 	}
 	
@@ -115,18 +115,9 @@ public class NeuralNetwork {
 			return result;
 		}
 		
-		public void update(Matrix nabla_b, Matrix nabla_w, double eta, double lambda, int n, int v) {
-			for (int neuron = 0; neuron < this.size(); ++neuron) {
-				for (int weight = 0; weight < this.weights.getm(neuron).size(); ++weight) {
-					this.weights.getm(neuron).set(weight,
-						((1.0-(eta*lambda/(double)n))*this.weights.getm(neuron).getd(weight))-((eta/(double)v)*nabla_w.getm(neuron).getd(weight))
-					);
-				}
-				this.biases.set(neuron,
-					(double)this.biases.get(neuron)
-					-((eta/(double)v)*(double)nabla_b.get(neuron))
-				);
-			}
+		public void update(Matrix nabla_b, Matrix nabla_w) {
+			this.weights = this.weights.subtract(nabla_w);
+			this.biases = this.biases.subtract(nabla_b);
 		}
 
 		public void check() {
@@ -297,10 +288,16 @@ public class NeuralNetwork {
       CrossEntropy() { return; }
 	}
 
+	private class Tanh extends ActivationFunction {
+      public double fn(double z) { return Math.tanh(z); }
+
+      public double prime(double z) { return 1.0d/Math.pow(Math.cosh(z),2.0d); }
+
+      Tanh() { return; }
+   }
+
 	private class Sigmoid extends ActivationFunction {
-		public double fn(double z) {
-			return 1.0/(1.0+Math.exp(-z));
-		}
+		public double fn(double z) { return 1.0d/(1.0d+Math.exp(-z)); }
 
 		public double prime(double z) {
 			return this.fn(z)*(1.0-this.fn(z));
@@ -312,9 +309,9 @@ public class NeuralNetwork {
 	}
 
 	private class ReLU extends ActivationFunction {
-      public double fn(double z) { return Math.log(1+Math.exp(z)); }
+      public double fn(double z) { return (z > 0 ? z : 0); }
 
-      public double prime(double z) { return 1.0/(1.0+Math.exp(-z)); }
+      public double prime(double z) { return (z > 0 ? 1 : 0); }
 
       ReLU() { return; }
    }
@@ -338,10 +335,36 @@ public class NeuralNetwork {
 			return gen.nextDouble()-gen.nextDouble();
 		}
 	}
+
+	public class L2Regularization extends RegularizationFunction {
+		public double reg(Matrix weights) {
+			return 0.5*weights.apply((j) -> Math.pow(j,2.0d)).sum();
+		}
+
+		public Matrix dv(Matrix weights) {
+			return weights;
+		}
+
+		L2Regularization() { return; }
+	}
+
+	public class NoRegularization extends RegularizationFunction {
+		public double reg(Matrix weights) {
+			return 0.0d;
+		}
+
+		public Matrix dv(Matrix weights) {
+			return weights.shape();
+		}
+
+		NoRegularization() { return; }
+	}
 	
 	private ArrayList<LayerClass> layers = new ArrayList<LayerClass>();
 	private CostFunction cost;
 	private ActivationFunction activation;
+	private RegularizationFunction regularization;
+	private RegularizationType regitype;
    private CostType costtype;
    private ActivationType actitype;
 	private double eta;
@@ -458,7 +481,13 @@ public class NeuralNetwork {
 			}
 		}
 		for (int layer = 1; layer < this.layers.size(); ++layer) {
-			this.layers.get(layer).update(nabla_b.getm(layer), nabla_w.getm(layer-1), this.eta, this.lambda, datasize, data.size());
+			Matrix w = this.layers.get(layer).getWeights();
+			Matrix nb = nabla_b.getm(layer).product(nabla_b.getm(layer).shape().fill(this.eta/(double)datasize));
+         Matrix tnw = nabla_w.getm(layer-1).product(nabla_w.getm(layer-1).shape().fill(this.eta/(double)datasize));
+         //Matrix nw = nabla_w.getm(layer-1).product(nabla_w.getm(layer-1).shape().fill(this.eta/(double)datasize)).add(w.mapply((j) -> this.regularization.dv(j).product(j.shape().fill(this.lambda*this.eta/(double)datasize))));
+			//System.out.println(tnw.print());
+         //System.out.println(nw.print());
+         this.layers.get(layer).update(nb, tnw);
 		}
 	}
 	
@@ -516,7 +545,14 @@ public class NeuralNetwork {
          Matrix a = this.feedforward(data.getm(i));
          total += this.cost.fn(answers.getm(i), a);
       }
-      return total/data.size();
+      double reg = 0.0d;
+      for (int l = 0; l < this.layers.size(); ++l) {
+	      Matrix w = this.layers.get(l).getWeights();
+	      for (int n = 0; n < w.size(); ++n) {
+		      total += this.regularization.reg(w.getm(n));
+	      }
+      }
+      return (total/data.size())+reg;
    }
 
 	public String json() {
@@ -643,37 +679,12 @@ public class NeuralNetwork {
 		return this;
 	}
 	
-	public NeuralNetwork Build(double eta, double lambda, CostType cost, ActivationType activation, InitializeType init) {
+	public NeuralNetwork Build(double eta, double lambda, CostType cost, ActivationType activation, InitializeType init, RegularizationType reg) {
 		this.eta = eta;
 		this.lambda = lambda;
       this.costtype = cost;
       this.actitype = activation;
-		switch (cost) {
-			default:
-			case QUADRATIC:
-			{
-				this.cost = new Quadratic();
-				break;
-			}
-         case CROSSENTROPY:
-         {
-            this.cost = new CrossEntropy();
-            break;
-         }
-		}
-		switch (activation) {
-			default:
-			case SIGMOID:
-			{
-				this.activation = new Sigmoid();
-				break;
-			}
-         case RELU:
-         {
-            this.activation = new ReLU();
-            break;
-         }
-		}
+		this.regitype = reg;
 		switch (init) {
 			default:
 			case DUMB:
@@ -687,7 +698,7 @@ public class NeuralNetwork {
 				break;
 			}
 		}
-		return this;
+		return this.Refresh();
 	}
 
 	public NeuralNetwork Refresh() {
@@ -715,6 +726,24 @@ public class NeuralNetwork {
          {
             this.activation = new ReLU();
             break;
+         }
+         case TANH:
+         {
+            this.activation = new Tanh();
+            break;
+         }
+      }
+      switch (this.regitype) {
+	      default:
+	      case L2:
+	      {
+		      this.regularization = new L2Regularization();
+		      break;
+	      }
+         case NONE:
+         {
+	         this.regularization = new NoRegularization();
+	         break;
          }
       }
       for (int l = 0; l < this.layers.size(); ++l) {

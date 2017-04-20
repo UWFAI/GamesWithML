@@ -270,6 +270,26 @@ public class Matrix {
 		return this;
 	}
 
+	public Matrix mapply(Function<Matrix,Matrix> f) {
+		Matrix newmatrix = new Matrix();
+		try {
+			for (int index = 0; index < this.size(); ++index) {
+            if (this.get(index) instanceof Matrix)
+            {
+               newmatrix.append(f.apply(this.getm(index)));
+            } else {
+               throw new Exception("can't apply matrix-only function to non-matrix");
+            }
+			}
+		}
+		catch (Exception e)
+		{
+         System.err.println("Failed mapplying to Matrix: %s".format(e.getMessage()));
+         e.printStackTrace();
+		}
+		return newmatrix;
+	}
+
 	public Matrix apply(Function<Double,Double> f) {
       Matrix newmatrix = new Matrix();
       try {
@@ -340,7 +360,7 @@ public class Matrix {
 			if (this.similar(matrix)) {
 				for (int index = 0; index < this.size(); ++index) {
 					if (this.get(index) instanceof Matrix) {
-						newmatrix.append(((Matrix)this.get(index)).add((Matrix)matrix.get(index)));
+						newmatrix.append(((Matrix)this.get(index)).subtract((Matrix)matrix.get(index)));
 					} else {
 						newmatrix.append((double)this.get(index)-(double)matrix.get(index));
 					}

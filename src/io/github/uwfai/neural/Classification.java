@@ -7,16 +7,16 @@ import java.io.File;
 
 public class Classification {
 	public static void main(String[] args) {
-		NeuralNetwork NN = new NeuralNetwork()
+		NeuralNetwork NN = new NeuralNetwork((long)1234)
 			.Input(2)
 			.Feedforward(3)
-			.Feedforward(3)
 			.Output(1)
-			.Build(10.0,
-					0.001,
+			.Build(200.0d,
+					1.0d,
 					NeuralNetwork.CostType.QUADRATIC,
 					NeuralNetwork.ActivationType.SIGMOID,
-					NeuralNetwork.InitializeType.SMART);
+					NeuralNetwork.InitializeType.SMART,
+					NeuralNetwork.RegularizationType.L2);
 		
 		Random gen = new Random(System.currentTimeMillis());
 		
@@ -38,12 +38,21 @@ public class Classification {
 				answers.append(new Matrix(0.0d));
 			}
 		}
+
+		/*System.out.println("Beginning optimization");
+		Optimizer op = new Optimizer(NN, data, answers);
+		op.setLambda(0.1d);
+		op.setBatchsize(25);
+		op.Eta(200.0d, 300.0d, 2, true);
+		NN.setEta(op.getEta());
+		System.out.format("Optimized: eta of %.3f\n", NN.getEta());*/
 		
 		//Scanner scan = new Scanner(System.in);
 		int width = 500;
 		int height = 500;
-		for (int i = 0; i < 33; ++i) {
+		for (int i = 0; i < 10; ++i) {
 			NN.train(data, answers, 1, 25);
+			System.out.format("Evaluation: %.3f\n", NN.evaluate(data, answers));
 			BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 			for (int xi = 0; xi < width; ++xi) {
 				for (int yi = 0; yi < height; ++yi) {
@@ -56,7 +65,10 @@ public class Classification {
 				}
 			}
 			try {
-				File output = new File("\\images\\train-"+i+".png");
+				File output = new File("train-"+i+".png");
+				if (!output.exists()) {
+					output.createNewFile();
+				}
 				ImageIO.write(bi, "png", output);
 			} catch (Exception e) {
 				e.printStackTrace();
