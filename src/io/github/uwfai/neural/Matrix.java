@@ -385,7 +385,7 @@ public class Matrix {
 					throw new Exception("item at index is not matrix - it's ("+this.get(index).getClass().getName()+")");
 				}
 			} else {
-				throw new Exception("index out of matrix bounds");
+				throw new Exception("index "+index+" out of matrix bounds");
 			}
 		} catch (Exception e) {
 			System.err.println(String.format("Error strict-Matrix getting from matrix: %s", e.getMessage()));
@@ -404,7 +404,7 @@ public class Matrix {
 					throw new Exception("item at index is not double - it's ("+this.get(index).getClass().getName()+")");
 				}
 			} else {
-				throw new Exception("index out of matrix bounds");
+				throw new Exception("index "+index+" out of matrix bounds");
 			}
 		} catch (Exception e) {
 			System.err.println(String.format("Error strict-Double getting from matrix: %s", e.getMessage()));
