@@ -3,7 +3,11 @@ package io.github.uwfai.neural;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.Type;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Random;
 import com.google.gson.*;
@@ -755,5 +759,24 @@ public class NeuralNetwork {
 	public NeuralNetwork Load(String JSON) {
       Gson gson = new Gson();
       return ((NeuralNetwork)gson.fromJson(JSON, new TypeToken<NeuralNetwork>(){}.getType())).Refresh();
+   }
+
+	static String readFile(String path, Charset encoding)
+			throws IOException
+	{
+		byte[] encoded = Files.readAllBytes(Paths.get(path));
+		return new String(encoded, encoding);
+	}
+
+   public NeuralNetwork LoadFromFile(String FILE) {
+	   Gson gson = new Gson();
+	   String JSON = "";
+	   try {
+		   JSON = readFile(FILE, Charset.defaultCharset());
+	   } catch (IOException e) {
+			System.err.format("Failed to load NeuralNetwork from file: %s\n", e.getMessage());
+		   e.printStackTrace();
+	   }
+	   return ((NeuralNetwork)gson.fromJson(JSON, new TypeToken<NeuralNetwork>(){}.getType())).Refresh();
    }
 }
