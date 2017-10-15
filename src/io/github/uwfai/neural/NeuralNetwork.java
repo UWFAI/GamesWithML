@@ -30,9 +30,6 @@ import io.github.uwfai.neural.regularization.RegularizationFunction;
 * @since 2017-3-3
 */
 public class NeuralNetwork {
-
-	public enum RegularizationType { NONE, L2 };
-	
 	/*
 	* To implement our layers, we have the default functions defined here. They are fairly
 	* basic, but because, specifically, our Feedforward and Output layers share most traits
@@ -333,7 +330,7 @@ public class NeuralNetwork {
 	private CostFunction cost;
 	private ActivationFunction activation;
 	private RegularizationFunction regularization;
-	private RegularizationType regitype;
+	private RegularizationFunction.RegularizationType regitype;
    private CostFunction.CostType costtype;
    private ActivationFunction.ActivationType actitype;
 	private double eta;
@@ -648,7 +645,7 @@ public class NeuralNetwork {
 		return this;
 	}
 	
-	public NeuralNetwork Build(double eta, double lambda, CostFunction.CostType cost, ActivationFunction.ActivationType activation, InitializationFunction.InitializationType init, RegularizationType reg) {
+	public NeuralNetwork Build(double eta, double lambda, CostFunction.CostType cost, ActivationFunction.ActivationType activation, InitializationFunction.InitializationType init, RegularizationFunction.RegularizationType reg) {
 		this.eta = eta;
 		this.lambda = lambda;
       this.costtype = cost;
