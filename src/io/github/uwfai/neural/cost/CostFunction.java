@@ -4,7 +4,7 @@ import io.github.uwfai.neural.Matrix;
 
 public interface CostFunction
 {
-   enum CostType { QUADRATIC, CROSSENTROPY }
+   enum CostType { QUADRATIC, CROSSENTROPY };
 
    double cost(Matrix y, Matrix a);
 
