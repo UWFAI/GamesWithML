@@ -1,9 +1,9 @@
 package io.github.uwfai.neural;
 
-import io.github.uwfai.neural.activation.ActivationFunction;
-import io.github.uwfai.neural.cost.CostFunction;
-import io.github.uwfai.neural.initialization.InitializationFunction;
-import io.github.uwfai.neural.regularization.RegularizationFunction;
+import io.github.uwfai.neural.function.ActivationFunction;
+import io.github.uwfai.neural.function.CostFunction;
+import io.github.uwfai.neural.function.InitializationFunction;
+import io.github.uwfai.neural.function.RegularizationFunction;
 
 import java.awt.image.BufferedImage;
 import java.util.Random;
@@ -18,10 +18,10 @@ public class Classification {
 			.Output(1)
 			.Build(200.0d,
 					1.0d,
-					CostFunction.CostType.QUADRATIC,
-					ActivationFunction.ActivationType.SIGMOID,
-					InitializationFunction.InitializationType.SMART,
-					RegularizationFunction.RegularizationType.L2);
+					CostFunction.QUADRATIC,
+					ActivationFunction.SIGMOID,
+					InitializationFunction.SMART,
+					RegularizationFunction.L2);
 		
 		Random gen = new Random(System.currentTimeMillis());
 		

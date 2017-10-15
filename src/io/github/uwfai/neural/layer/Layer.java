@@ -2,8 +2,8 @@ package io.github.uwfai.neural.layer;
 
 import com.google.gson.Gson;
 import io.github.uwfai.neural.Matrix;
-import io.github.uwfai.neural.activation.ActivationFunction;
-import io.github.uwfai.neural.initialization.InitializationFunction;
+import io.github.uwfai.neural.function.ActivationFunction;
+import io.github.uwfai.neural.function.InitializationFunction;
 
 import java.util.Random;
 

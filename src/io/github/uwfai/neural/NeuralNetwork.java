@@ -2,23 +2,14 @@ package io.github.uwfai.neural;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import io.github.uwfai.neural.activation.ActivationFunction;
-import io.github.uwfai.neural.activation.ReLUActivationFunction;
-import io.github.uwfai.neural.activation.SigmoidActivationFunction;
-import io.github.uwfai.neural.activation.TanhActivationFunction;
-import io.github.uwfai.neural.cost.CostFunction;
-import io.github.uwfai.neural.cost.CrossEntropyCostFunction;
-import io.github.uwfai.neural.cost.QuadraticCostFunction;
-import io.github.uwfai.neural.initialization.DumbInitializationFunction;
-import io.github.uwfai.neural.initialization.InitializationFunction;
-import io.github.uwfai.neural.initialization.SmartInitializationFunction;
+import io.github.uwfai.neural.function.ActivationFunction;
+import io.github.uwfai.neural.function.CostFunction;
+import io.github.uwfai.neural.function.InitializationFunction;
+import io.github.uwfai.neural.function.RegularizationFunction;
 import io.github.uwfai.neural.layer.ConvolutionalLayer;
 import io.github.uwfai.neural.layer.InputLayer;
 import io.github.uwfai.neural.layer.Layer;
 import io.github.uwfai.neural.layer.OutputLayer;
-import io.github.uwfai.neural.regularization.L2RegularizationFunction;
-import io.github.uwfai.neural.regularization.NoRegularizationFunction;
-import io.github.uwfai.neural.regularization.RegularizationFunction;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -47,9 +38,6 @@ public class NeuralNetwork {
 	private CostFunction cost;
 	private ActivationFunction activation;
 	private RegularizationFunction regularization;
-	private RegularizationFunction.RegularizationType regitype;
-   private CostFunction.CostType costtype;
-   private ActivationFunction.ActivationType actitype;
 	private double eta;
 	private double lambda;
 	private Random gen = new Random();
@@ -232,7 +220,7 @@ public class NeuralNetwork {
       for (int l = 0; l < this.layers.size(); ++l) {
 	      Matrix w = this.layers.get(l).getWeights();
 	      for (int n = 0; n < w.size(); ++n) {
-		      total += this.regularization.reg(w.getm(n));
+		      total += this.regularization.regularize(w.getm(n));
 	      }
       }
       return (total/data.size())+reg;
@@ -276,14 +264,12 @@ public class NeuralNetwork {
       this.lambda = nlambda;
    }
 
-   public void setCost(CostFunction.CostType ncosttype) {
-      this.costtype = ncosttype;
-      this.Refresh();
+   public void setCost(CostFunction newCost) {
+      this.cost = newCost;
    }
 
-   public void setActivation(ActivationFunction.ActivationType nactitype) {
-      this.actitype = nactitype;
-      this.Refresh();
+   public void setActivation(ActivationFunction newActivation) {
+      this.activation = newActivation;
    }
 
    public double getEta() {
@@ -362,82 +348,19 @@ public class NeuralNetwork {
 		return this;
 	}
 	
-	public NeuralNetwork Build(double eta, double lambda, CostFunction.CostType cost, ActivationFunction.ActivationType activation, InitializationFunction.InitializationType init, RegularizationFunction.RegularizationType reg) {
+	public NeuralNetwork Build(double eta, double lambda, CostFunction cost, ActivationFunction activation, InitializationFunction init, RegularizationFunction reg) {
 		this.eta = eta;
 		this.lambda = lambda;
-      this.costtype = cost;
-      this.actitype = activation;
-		this.regitype = reg;
-		switch (init) {
-			default:
-			case DUMB:
-			{
-				this.initialize(new DumbInitializationFunction());
-				break;
-			}
-			case SMART:
-			{
-				this.initialize(new SmartInitializationFunction());
-				break;
-			}
-		}
-		return this.Refresh();
+      this.cost = cost;
+      this.activation = activation;
+		this.regularization = reg;
+		this.initialize(init);
+		return this;
 	}
-
-	public NeuralNetwork Refresh() {
-      switch (this.costtype) {
-         default:
-         case QUADRATIC:
-         {
-            this.cost = new QuadraticCostFunction();
-            break;
-         }
-         case CROSSENTROPY:
-         {
-            this.cost = new CrossEntropyCostFunction();
-         }
-      }
-      switch (this.actitype)
-      {
-         default:
-         case SIGMOID:
-         {
-            this.activation = new SigmoidActivationFunction();
-            break;
-         }
-         case RELU:
-         {
-            this.activation = new ReLUActivationFunction();
-            break;
-         }
-         case TANH:
-         {
-            this.activation = new TanhActivationFunction();
-            break;
-         }
-      }
-      switch (this.regitype) {
-	      default:
-	      case L2:
-	      {
-		      this.regularization = new L2RegularizationFunction();
-		      break;
-	      }
-         case NONE:
-         {
-	         this.regularization = new NoRegularizationFunction();
-	         break;
-         }
-      }
-      for (int l = 0; l < this.layers.size(); ++l) {
-         this.layers.get(l).check();
-      }
-      return this;
-   }
 
 	public NeuralNetwork Load(String JSON) {
       Gson gson = new Gson();
-      return ((NeuralNetwork)gson.fromJson(JSON, new TypeToken<NeuralNetwork>(){}.getType())).Refresh();
+      return ((NeuralNetwork)gson.fromJson(JSON, new TypeToken<NeuralNetwork>(){}.getType()));
    }
 
 	static String readFile(String path, Charset encoding)
@@ -456,6 +379,6 @@ public class NeuralNetwork {
 			System.err.format("Failed to load NeuralNetwork from file: %s\n", e.getMessage());
 		   e.printStackTrace();
 	   }
-	   return ((NeuralNetwork)gson.fromJson(JSON, new TypeToken<NeuralNetwork>(){}.getType())).Refresh();
+	   return ((NeuralNetwork)gson.fromJson(JSON, new TypeToken<NeuralNetwork>(){}.getType()));
    }
 }

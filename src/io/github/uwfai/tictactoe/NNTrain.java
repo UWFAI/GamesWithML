@@ -2,10 +2,10 @@ package io.github.uwfai.tictactoe;
 
 import io.github.uwfai.neural.Matrix;
 import io.github.uwfai.neural.NeuralNetwork;
-import io.github.uwfai.neural.activation.ActivationFunction;
-import io.github.uwfai.neural.cost.CostFunction;
-import io.github.uwfai.neural.initialization.InitializationFunction;
-import io.github.uwfai.neural.regularization.RegularizationFunction;
+import io.github.uwfai.neural.function.ActivationFunction;
+import io.github.uwfai.neural.function.CostFunction;
+import io.github.uwfai.neural.function.InitializationFunction;
+import io.github.uwfai.neural.function.RegularizationFunction;
 
 import java.util.Random;
 
@@ -18,10 +18,10 @@ public final class NNTrain
    private static double lambda = 0.1d;
    private static int inner = 5;
    private static int batchsize = 33;
-   private static CostFunction.CostType ct = CostFunction.CostType.CROSSENTROPY;
-   private static ActivationFunction.ActivationType at = ActivationFunction.ActivationType.SIGMOID;
-   private static InitializationFunction.InitializationType it = InitializationFunction.InitializationType.SMART;
-   private static RegularizationFunction.RegularizationType rt = RegularizationFunction.RegularizationType.L2;
+   private static CostFunction ct = CostFunction.CROSSENTROPY;
+   private static ActivationFunction at = ActivationFunction.SIGMOID;
+   private static InitializationFunction it = InitializationFunction.SMART;
+   private static RegularizationFunction rt = RegularizationFunction.L2;
 
    private static Random gen = new Random();
    private static double mutation = 0.01d;
