@@ -1,9 +1,11 @@
 package io.github.uwfai.neural;
 
+import com.sun.org.apache.regexp.internal.RE;
 import io.github.uwfai.neural.function.ActivationFunction;
 import io.github.uwfai.neural.function.CostFunction;
 import io.github.uwfai.neural.function.InitializationFunction;
 import io.github.uwfai.neural.function.RegularizationFunction;
+import io.github.uwfai.neural.layer.Layer;
 
 import java.awt.image.BufferedImage;
 import java.util.Random;
@@ -12,16 +14,16 @@ import java.io.File;
 
 public class Classification {
 	public static void main(String[] args) {
-		NeuralNetwork NN = new NeuralNetwork((long)1234)
-			.Input(2)
-			.Feedforward(3)
-			.Output(1)
-			.Build(200.0d,
-					1.0d,
-					CostFunction.QUADRATIC,
-					ActivationFunction.SIGMOID,
-					InitializationFunction.SMART,
-					RegularizationFunction.L2);
+		NeuralNetwork NN = new NeuralNetwork(
+				1234L,
+				2,
+				InitializationFunction.SMART,
+				RegularizationFunction.L2,
+				CostFunction.QUADRATIC,
+				new Layer[]{
+					new Layer(27, ActivationFunction.SIGMOID),
+					new Layer(1, ActivationFunction.SIGMOID)
+				});
 		
 		Random gen = new Random(System.currentTimeMillis());
 		
@@ -35,33 +37,27 @@ public class Classification {
 			double theta = 2*Math.PI*gen.nextDouble();
 			double rplus = flux*(gen.nextDouble()-gen.nextDouble());
 			if (gen.nextDouble() > 0.5) {
-				data.append(new Matrix((R+rplus)*Math.cos(theta), (R+rplus)*Math.sin(theta)));
+				//data.append(new Matrix((R+rplus)*Math.cos(theta), (R+rplus)*Math.sin(theta)));
+				data.append(new Matrix(Math.pow((R+rplus)*Math.cos(theta),2.0d), Math.pow((R+rplus)*Math.sin(theta),2.0d)));
 				answers.append(new Matrix(1.0d));
 			} else {
 				double tr = (r+rplus)*gen.nextDouble();
-				data.append(new Matrix((tr)*Math.cos(theta), (tr)*Math.sin(theta)));
+				//data.append(new Matrix((tr)*Math.cos(theta), (tr)*Math.sin(theta)));
+				data.append(new Matrix(Math.pow((tr)*Math.cos(theta),2.0d), Math.pow((tr)*Math.sin(theta),2.0d)));
 				answers.append(new Matrix(0.0d));
 			}
 		}
 
-		/*System.out.println("Beginning optimization");
-		Optimizer op = new Optimizer(NN, data, answers);
-		op.setLambda(0.1d);
-		op.setBatchsize(25);
-		op.Eta(200.0d, 300.0d, 2, true);
-		NN.setEta(op.getEta());
-		System.out.format("Optimized: eta of %.3f\n", NN.getEta());*/
-		
-		//Scanner scan = new Scanner(System.in);
 		int width = 500;
 		int height = 500;
-		for (int i = 0; i < 10; ++i) {
-			NN.train(data, answers, 1, 25);
+		for (int i = 0; i < 100; ++i) {
+			NN.train(data, answers, 1, 25, 5.0d, 0.1d);
 			System.out.format("Evaluation: %.3f\n", NN.evaluate(data, answers));
 			BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 			for (int xi = 0; xi < width; ++xi) {
 				for (int yi = 0; yi < height; ++yi) {
-					double v = NN.feedforward(new Matrix((R+r+flux)*(xi-(width/2.0))/(width/2.0), (R+r+flux)*(yi-(height/2.0))/(height/2.0))).getd(0);
+					//double v = NN.feedforward(new Matrix((R+r+flux)*(xi-(width/2.0))/(width/2.0), (R+r+flux)*(yi-(height/2.0))/(height/2.0))).getd(0);
+					double v = NN.feedforward(new Matrix(Math.pow((R+r+flux)*(xi-(width/2.0))/(width/2.0),2.0d), Math.pow((R+r+flux)*(yi-(height/2.0))/(height/2.0),2.0d))).getd(0);
 					int alpha = (int)(255 << 24);
 					int red = (int)(((int)Math.floor((v < 0.5 ? ((0.5-v)/0.5)*255.0 : 0))) << 16);
 					int green = (int)(0 << 8);

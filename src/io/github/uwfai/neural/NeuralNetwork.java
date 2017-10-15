@@ -2,14 +2,10 @@ package io.github.uwfai.neural;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import io.github.uwfai.neural.function.ActivationFunction;
 import io.github.uwfai.neural.function.CostFunction;
 import io.github.uwfai.neural.function.InitializationFunction;
 import io.github.uwfai.neural.function.RegularizationFunction;
-import io.github.uwfai.neural.layer.ConvolutionalLayer;
-import io.github.uwfai.neural.layer.InputLayer;
 import io.github.uwfai.neural.layer.Layer;
-import io.github.uwfai.neural.layer.OutputLayer;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -19,6 +15,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -36,25 +33,8 @@ import java.util.Random;
 public class NeuralNetwork {
 	private ArrayList<Layer> layers = new ArrayList<>();
 	private CostFunction cost;
-	private ActivationFunction activation;
 	private RegularizationFunction regularization;
-	private double eta;
-	private double lambda;
 	private Random gen = new Random();
-	
-	/*
-	* Our network, of course, must be initialized. We initialize our weights and biases based on
-	* the initialization function we choose in the NeuralNetwork constructor.
-	*/
-	
-	public void initialize(InitializationFunction init) {
-		int size = this.size();
-		for (int layer = 0; layer < this.layers.size(); ++layer) {
-			Layer prev = this.layers.get(0);
-			if (layer > 0) { prev = this.layers.get(layer-1); }
-			this.layers.get(layer).initialize(init, prev, this.gen, size);
-		}
-	}
 	
 	/*
 	* This function simply feeds the inputs forward through the network and returns the output
@@ -63,7 +43,7 @@ public class NeuralNetwork {
 	
 	public Matrix feedforward(Matrix activations, Matrix zs, Matrix as) {
 		for (Layer layer : this.layers) {
-			activations = layer.feedforward(activations, this.activation, zs, as);
+			activations = layer.feedforward(activations, zs, as);
 		}
 		return activations;
 	}
@@ -89,13 +69,13 @@ public class NeuralNetwork {
 		Matrix as = new Matrix();
 		Matrix rs = this.feedforward(data, zs, as);
 		Matrix error = new Matrix();
-		
+
 		error.prepend(cost.derivative(answers, as.getm(as.size()-1)));
 		
 		for (int layer = this.layers.size()-1; layer > 0; --layer) {
 			Matrix adjust = new Matrix();
 			for (int neuron = 0; neuron < this.layers.get(layer).size(); ++neuron) {
-				adjust.append(this.activation.derivative(zs.getm(layer).getd(neuron)));
+				adjust.append(this.layers.get(layer).activationDerivative(zs.getm(layer).getd(neuron)));
 			}
 			error.set(0, error.getm(0).product(adjust));
 			
@@ -138,7 +118,7 @@ public class NeuralNetwork {
 	* example accidentally.
 	*/
 	
-	public void batch(Matrix data, Matrix answers, int datasize) {
+	public void batch(Matrix data, Matrix answers, int datasize, double eta, double lambda) {
 		Matrix nabla_b = new Matrix();
 		Matrix nabla_w = new Matrix();
 		for (int set = 0; set < data.size(); ++set) {
@@ -153,12 +133,9 @@ public class NeuralNetwork {
 		}
 		for (int layer = 1; layer < this.layers.size(); ++layer) {
 			Matrix w = this.layers.get(layer).getWeights();
-			Matrix nb = nabla_b.getm(layer).product(nabla_b.getm(layer).shape().fill(this.eta/(double)datasize));
-         Matrix tnw = nabla_w.getm(layer-1).product(nabla_w.getm(layer-1).shape().fill(this.eta/(double)datasize));
-         //Matrix nw = nabla_w.getm(layer-1).product(nabla_w.getm(layer-1).shape().fill(this.eta/(double)datasize)).add(w.mapply((j) -> this.regularization.dv(j).product(j.shape().fill(this.lambda*this.eta/(double)datasize))));
-			//System.out.println(tnw.print());
-         //System.out.println(nw.print());
-         this.layers.get(layer).update(nb, tnw);
+			Matrix nb = nabla_b.getm(layer).product(nabla_b.getm(layer).shape().fill(eta/(double)datasize));
+         Matrix nw = nabla_w.getm(layer-1).product(nabla_w.getm(layer-1).shape().fill(eta/(double)datasize)).add(w.mapply((j) -> this.regularization.derivative(j).product(j.shape().fill(lambda*eta/(double)datasize))));
+         this.layers.get(layer).update(nb, nw);
 		}
 	}
 	
@@ -170,7 +147,7 @@ public class NeuralNetwork {
 	* test data.
 	*/
 	
-	public void epoch(Matrix data, Matrix answers, int batchsize) {
+	public void epoch(Matrix data, Matrix answers, int batchsize, double eta, double lambda) {
 		int batches = (int)Math.floor((double)data.size()/(double)batchsize);
 		for (int batch = 0; batch < batches; ++batch) {
 			Matrix bdata = new Matrix();
@@ -181,7 +158,7 @@ public class NeuralNetwork {
 				badata.append(new Matrix(answers.getm((batch*batchsize)+i)));
 			}
 			
-			this.batch(bdata, badata, data.size());
+			this.batch(bdata, badata, data.size(), eta, lambda);
 		}
 	}
 	
@@ -190,7 +167,7 @@ public class NeuralNetwork {
 	* performs all of the above and gives us how accurate our network is without too much effort.
 	*/
 	
-	public void train(Matrix data, Matrix answers, int epochs, int batchsize) {
+	public void train(Matrix data, Matrix answers, int epochs, int batchsize, double eta, double lambda) {
 		for (int epoch = 0; epoch < epochs; ++epoch) {
 			Matrix tdata = new Matrix(data);
 			Matrix tadata = new Matrix(answers);
@@ -206,7 +183,7 @@ public class NeuralNetwork {
 				tadata.set(index2, swap);
 			}
 			
-			this.epoch(tdata, tadata, batchsize);
+			this.epoch(tdata, tadata, batchsize, eta, lambda);
 		}
 	}
 
@@ -247,118 +224,32 @@ public class NeuralNetwork {
 
 		}
 	}
-
-	public int size() {
-		int num = this.layers.get(0).size();
-		for (int layer = 1; layer < this.layers.size(); ++layer) {
-			num *= this.layers.get(layer).size();
-		}
-		return num;
-	}
-
-	public void setEta(double neta) {
-      this.eta = neta;
-   }
-
-   public void setLambda(double nlambda) {
-      this.lambda = nlambda;
-   }
-
-   public void setCost(CostFunction newCost) {
-      this.cost = newCost;
-   }
-
-   public void setActivation(ActivationFunction newActivation) {
-      this.activation = newActivation;
-   }
-
-   public double getEta() {
-      return this.eta;
-   }
-
-   public double getLambda() {
-      return this.lambda;
-   }
 	
-	/*
-	* The rest of the functions are what we use on the frontend to define our network. Each network
-	* follows the same construction patterned, all packaged together in one line:
-	*
-	* new NeuralNetwork(long seed)
-	*	.Input(int height)
-	*	.Feedforward(int height)
-	*	...
-	*	.Output(int height)
-	*	.Build(double eta,
-	*			double lambda,
-	*			CostType cost,
-	*			ActivationType activation,
-	*			InitializationType init);
-	*
-	* You MUST keep track of the connections you need. Avoiding the counterintuitive design of DL4J,
-	* there is no function/class for connecting layers. Be aware of what sizes of weights you need in
-	* order to properly connect to the previous layers. (This is mostly relevant for CNNs - Feedforward
-	* layers do all of the connecting for you.)
-	*/
-	
-	public NeuralNetwork(long seed) {
+	public NeuralNetwork(long seed, int inputSize, InitializationFunction initialization, RegularizationFunction regularization, CostFunction cost, Layer[] layers) {
 		this.gen.setSeed(seed);
-	}
-	
-	public NeuralNetwork() {
-		this((long)0);
-	}
-	
-	public NeuralNetwork Input(int height) {
-		layers.add(new InputLayer(1, height));
-		return this;
-	}
-	
-	public NeuralNetwork Input(int width, int height) {
-		layers.add(new InputLayer(width, height));
-		return this;
-	}
-	
-	public NeuralNetwork Feedforward(int height) {
-		layers.add(new Layer(height));
-		return this;
-	}
-	
-	public NeuralNetwork Convolutional(int width, int height) {
-		layers.add(new ConvolutionalLayer(width, height));
-		return this;
-	}
-	
-	public NeuralNetwork Filter(Matrix filter) {
-		try {
-			if (this.layers.get(this.layers.size()-1) instanceof ConvolutionalLayer) {
-				((ConvolutionalLayer)this.layers.get(this.layers.size()-1)).setFilter(filter);
-			} else {
-				throw new Exception("most recent layer not convolutional");
-			}
-		} catch (Exception e) {
-			System.err.println("Error filtering convolutional layer: %s".format(e.getMessage()));
-			e.printStackTrace();
+
+		this.cost = cost;
+		this.regularization = regularization;
+
+		this.layers = new ArrayList<>(Arrays.asList(layers));
+
+		int totalSize = 0;
+		for (Layer layer : this.layers) {
+			totalSize += layer.size();
 		}
-		return this;
+
+		this.layers.get(0).initialize(initialization, new int[]{inputSize, 1}, gen, totalSize);
+
+		for (int layer = 1; layer < this.layers.size(); ++layer) {
+			this.layers.get(layer).initialize(initialization, this.layers.get(layer-1).dimensions(), gen, totalSize);
+		}
 	}
 	
-	public NeuralNetwork Output(int height) {
-		layers.add(new OutputLayer(height));
-		return this;
-	}
-	
-	public NeuralNetwork Build(double eta, double lambda, CostFunction cost, ActivationFunction activation, InitializationFunction init, RegularizationFunction reg) {
-		this.eta = eta;
-		this.lambda = lambda;
-      this.cost = cost;
-      this.activation = activation;
-		this.regularization = reg;
-		this.initialize(init);
-		return this;
+	public NeuralNetwork(int inputSize, InitializationFunction initialization, RegularizationFunction regularization, CostFunction cost, Layer[] layers) {
+		this(0L, inputSize, initialization, regularization, cost, layers);
 	}
 
-	public NeuralNetwork Load(String JSON) {
+	public static NeuralNetwork Load(String JSON) {
       Gson gson = new Gson();
       return ((NeuralNetwork)gson.fromJson(JSON, new TypeToken<NeuralNetwork>(){}.getType()));
    }
@@ -370,7 +261,7 @@ public class NeuralNetwork {
 		return new String(encoded, encoding);
 	}
 
-   public NeuralNetwork LoadFromFile(String FILE) {
+   public static NeuralNetwork LoadFromFile(String FILE) {
 	   Gson gson = new Gson();
 	   String JSON = "";
 	   try {

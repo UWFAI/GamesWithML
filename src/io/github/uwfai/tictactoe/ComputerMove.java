@@ -11,15 +11,15 @@ import io.github.uwfai.neural.NeuralNetwork;
 public class ComputerMove
 {
 
-   private NeuralNetwork NN0 = new NeuralNetwork();
-   private NeuralNetwork NN1 = new NeuralNetwork();
-   private NeuralNetwork NN2 = new NeuralNetwork();
-   private NeuralNetwork NN3 = new NeuralNetwork();
-   private NeuralNetwork NN4 = new NeuralNetwork();
-   private NeuralNetwork NN5 = new NeuralNetwork();
-   private NeuralNetwork NN6 = new NeuralNetwork();
-   private NeuralNetwork NN7 = new NeuralNetwork();
-   private NeuralNetwork NN8 = new NeuralNetwork();
+   private NeuralNetwork NN0;
+   private NeuralNetwork NN1;
+   private NeuralNetwork NN2;
+   private NeuralNetwork NN3;
+   private NeuralNetwork NN4;
+   private NeuralNetwork NN5;
+   private NeuralNetwork NN6;
+   private NeuralNetwork NN7;
+   private NeuralNetwork NN8;
 
    private boolean computerTurn = true;
 
@@ -59,7 +59,7 @@ public class ComputerMove
                }
                br.close();
                fr.close();
-               NNs.get(n).Load(json);
+               NNs.set(n, NeuralNetwork.Load(json));
             }
          }
          catch (Exception e)

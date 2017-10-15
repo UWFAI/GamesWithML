@@ -3,17 +3,18 @@ package io.github.uwfai.neural.layer;
 import io.github.uwfai.neural.Matrix;
 import io.github.uwfai.neural.function.ActivationFunction;
 import io.github.uwfai.neural.function.InitializationFunction;
+import io.github.uwfai.neural.function.RegularizationFunction;
 
 import java.util.Random;
 
 public class ConvolutionalLayer extends Layer {
    @Override
-   public Matrix feedforward(Matrix activations, ActivationFunction activation, Matrix as, Matrix zs) {
+   public Matrix feedforward(Matrix activations, Matrix as, Matrix zs) {
       return new Matrix();
    }
 
    @Override
-   public void initialize(InitializationFunction init, Layer previous, Random gen, int n) {
+   public void initialize(InitializationFunction init, int[] previousSize, Random gen, int n) {
       return;
    }
 
@@ -30,7 +31,7 @@ public class ConvolutionalLayer extends Layer {
       }
    }
 
-   public ConvolutionalLayer(int width, int height) {
-      super(width, height);
+   public ConvolutionalLayer(int width, int height, ActivationFunction activation) {
+      super(width, height, activation);
    }
 }

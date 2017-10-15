@@ -6,6 +6,7 @@ import io.github.uwfai.neural.function.ActivationFunction;
 import io.github.uwfai.neural.function.CostFunction;
 import io.github.uwfai.neural.function.InitializationFunction;
 import io.github.uwfai.neural.function.RegularizationFunction;
+import io.github.uwfai.neural.layer.Layer;
 
 import java.util.Random;
 
@@ -26,18 +27,7 @@ public final class NNTrain
    private static Random gen = new Random();
    private static double mutation = 0.01d;
 
-   private static NeuralNetwork[] NNs = {
-         new NeuralNetwork(),
-         new NeuralNetwork(),
-         new NeuralNetwork(),
-         new NeuralNetwork(),
-         new NeuralNetwork(),
-         new NeuralNetwork(),
-         new NeuralNetwork(),
-         new NeuralNetwork(),
-         new NeuralNetwork(),
-         new NeuralNetwork()
-   };
+   private static NeuralNetwork[] NNs = new NeuralNetwork[9];
 
    public static double mutate(double value) {
       return value+(value*mutation*(gen.nextDouble()-gen.nextDouble()));
@@ -252,10 +242,10 @@ public final class NNTrain
       double[] optietas = {4.35, 3.40, 5.00, 4.30, 3.35, 5.10};
       for (int n = 0; n < 6; ++n)
       {
-         NNs[n] = new NeuralNetwork().LoadFromFile("NN"+n+".json");
+         NNs[n] = NeuralNetwork.LoadFromFile("NN"+n+".json");
       }
 
-      NNs[7] = new NeuralNetwork().Input(6).Feedforward(inner).Output(9).Build(eta, lambda, ct, at, it, rt);
+      NNs[7] = new NeuralNetwork(6, it, rt, ct, new Layer[]{new Layer(inner, at), new Layer(9, at)});
 
       int bestscore = 0;
       while (bestscore < 500)
@@ -268,12 +258,12 @@ public final class NNTrain
             int attempt = 0;
             while (attempt < 50)
             {
-               NNs[n].train(Data.data, ans[n], 1, batchsize);
+               NNs[n].train(Data.data, ans[n], 1, batchsize, eta, lambda);
                while (NNs[n].evaluate(Data.data, ans[n]) < score)
                {
                   best = NNs[n].json();
                   score = NNs[n].evaluate(Data.data, ans[n]);
-                  NNs[n].train(Data.data, ans[n], 1, batchsize);
+                  NNs[n].train(Data.data, ans[n], 1, batchsize, eta, lambda);
                   attempt = 0;
                }
                ++attempt;
@@ -322,12 +312,12 @@ public final class NNTrain
          int attempt = 0;
          while (attempt < 100)
          {
-            NNs[7].train(fdata, ans[7], 1, batchsize);
+            NNs[7].train(fdata, ans[7], 1, batchsize, eta, lambda);
             while (nscore >= score)
             {
                best = NNs[7].json();
                System.out.format("Current: %.3f (%d of %d correct)\n", NNs[7].evaluate(fdata, ans[7]), nscore, 852);
-               NNs[7].train(fdata, ans[7], 1, batchsize);
+               NNs[7].train(fdata, ans[7], 1, batchsize, eta, lambda);
                attempt = 0;
                score = nscore;
 
