@@ -38,7 +38,7 @@ public class NeuralNetwork {
 	* initializations functions aren't specifically defined for each class of layer.
 	*/
 	
-	private class LayerClass {
+	private abstract class LayerClass {
 		Matrix weights;
 		Matrix biases;
 		int width;
@@ -105,12 +105,6 @@ public class NeuralNetwork {
 			this.height = height;
 		}
 	}
-
-   private class LayerClassInstanceCreator implements InstanceCreator<LayerClass> {
-      public LayerClass createInstance(Type type) {
-         return new LayerClass(1, 1);
-      }
-   }
 	
 	/*
 	* The feeforward layer is the core part of our neural networks. Feedforward layers do exactly
@@ -120,17 +114,11 @@ public class NeuralNetwork {
 	* defined by the user with the constructor Layer(height).
 	*/
 	
-	private class FeedforwardLayer extends LayerClass {
+	private final class FeedforwardLayer extends LayerClass {
 		FeedforwardLayer(int height) {
 			super(1, height);
 		}
 	}
-
-   private class FeedforwardLayerCreator implements InstanceCreator<FeedforwardLayer> {
-      public FeedforwardLayer createInstance(Type type) {
-         return new FeedforwardLayer(1);
-      }
-   }
 	
 	/*
 	* TODO: convolutional neural network layers. The implementation is simple: for each grid of
@@ -143,7 +131,6 @@ public class NeuralNetwork {
 	
 	private class ConvolutionalLayer extends LayerClass {
 		public Matrix feedforward(Matrix activations, ActivationFunction activation, Matrix as, Matrix zs) {
-			
 			return new Matrix();
 		}
 		
@@ -168,12 +155,6 @@ public class NeuralNetwork {
 			super(width, height);
 		}
 	}
-
-   private class ConvolutionalLayerCreator implements InstanceCreator<ConvolutionalLayer> {
-      public ConvolutionalLayer createInstance(Type type) {
-         return new ConvolutionalLayer(1, 1);
-      }
-   }
 	
 	/*
 	* The InputLayer is the first layer defined for our network and gives us the functionality of
@@ -215,12 +196,6 @@ public class NeuralNetwork {
 			this(1, height);
 		}
 	}
-
-   private class InputLayerCreator implements InstanceCreator<InputLayer> {
-      public InputLayer createInstance(Type type) {
-         return new InputLayer(1);
-      }
-   }
 
 	/*
 	* The Output layer functions similary to the Feedforward layers, but it must always come last
