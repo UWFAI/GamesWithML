@@ -15,6 +15,7 @@ import com.google.gson.reflect.TypeToken;
 import io.github.uwfai.neural.activation.ActivationFunction;
 import io.github.uwfai.neural.cost.CostFunction;
 import io.github.uwfai.neural.initialization.InitializationFunction;
+import io.github.uwfai.neural.regularization.RegularizationFunction;
 
 /**
 * NeuralNetwork library
@@ -29,14 +30,8 @@ import io.github.uwfai.neural.initialization.InitializationFunction;
 * @since 2017-3-3
 */
 public class NeuralNetwork {
-	
+
 	public enum RegularizationType { NONE, L2 };
-	
-	private class RegularizationFunction {
-		public double reg(Matrix weights) { return 0.0d; }
-		public Matrix dv(Matrix weights) { return weights.shape(); }
-      public RegularizationFunction() { }
-	}
 	
 	/*
 	* To implement our layers, we have the default functions defined here. They are fairly
@@ -309,7 +304,7 @@ public class NeuralNetwork {
 		}
 	}
 
-	public class L2Regularization extends RegularizationFunction {
+	public class L2Regularization implements RegularizationFunction {
 		public double reg(Matrix weights) {
 			return 0.5*weights.apply((j) -> Math.pow(j,2.0d)).sum();
 		}
@@ -321,7 +316,8 @@ public class NeuralNetwork {
 		L2Regularization() { return; }
 	}
 
-	public class NoRegularization extends RegularizationFunction {
+	public class NoRegularization implements RegularizationFunction
+	{
 		public double reg(Matrix weights) {
 			return 0.0d;
 		}
