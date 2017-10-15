@@ -41,21 +41,6 @@ import io.github.uwfai.neural.regularization.RegularizationFunction;
 */
 public class NeuralNetwork {
 	/*
-	* The feedforward layer is the core part of our neural networks. Feedforward layers do exactly
-	* what the name says - they push the input through the network to deliver your output. They
-	* implement the default functions in the LayerClass, only providing the constructor which
-	* tells the LayerClass that it is of 1 width (only one column) and a certain height, as
-	* defined by the user with the constructor Layer(height).
-	*/
-
-	private final class FeedforwardLayer extends Layer
-	{
-		FeedforwardLayer(int height) {
-			super(1, height);
-		}
-	}
-	
-	/*
 	* TODO: convolutional neural network layers. The implementation is simple: for each grid of
 	* neurons that fits the weights structure (defined through the constructor as Convolutional(
 	* width, height)), calculate the difference from the "filter"/"lens" and create a new layer
@@ -439,7 +424,7 @@ public class NeuralNetwork {
 	}
 	
 	public NeuralNetwork Feedforward(int height) {
-		layers.add(new FeedforwardLayer(height));
+		layers.add(new Layer(height));
 		return this;
 	}
 	

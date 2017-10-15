@@ -8,7 +8,7 @@ import io.github.uwfai.neural.initialization.InitializationFunction;
 
 import java.util.Random;
 
-public abstract class Layer
+public class Layer
 {
    protected Matrix weights;
    protected Matrix biases;
@@ -73,5 +73,9 @@ public abstract class Layer
    public String json() {
       Gson gson = new Gson();
       return gson.toJson(this);
+   }
+
+   public Layer(int height) {
+      this(1, height);
    }
 }
