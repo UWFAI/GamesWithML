@@ -34,9 +34,7 @@ public class NeuralNetwork {
 	* for building an efficient network. It depends on your problem and your network, but
 	* the below implementations of these interfaces are the core of fundamental neural
 	* networking.
-	*/
-	
-	public enum CostType { QUADRATIC, CROSSENTROPY };
+	*/;
 	public enum ActivationType { SIGMOID, RELU, TANH };
 	public enum InitializeType { DUMB, SMART };
 	public enum RegularizationType { NONE, L2 };
@@ -353,7 +351,7 @@ public class NeuralNetwork {
 	private ActivationFunction activation;
 	private RegularizationFunction regularization;
 	private RegularizationType regitype;
-   private CostType costtype;
+   private CostFunction.CostType costtype;
    private ActivationType actitype;
 	private double eta;
 	private double lambda;
@@ -581,7 +579,7 @@ public class NeuralNetwork {
       this.lambda = nlambda;
    }
 
-   public void setCost(CostType ncosttype) {
+   public void setCost(CostFunction.CostType ncosttype) {
       this.costtype = ncosttype;
       this.Refresh();
    }
@@ -667,7 +665,7 @@ public class NeuralNetwork {
 		return this;
 	}
 	
-	public NeuralNetwork Build(double eta, double lambda, CostType cost, ActivationType activation, InitializeType init, RegularizationType reg) {
+	public NeuralNetwork Build(double eta, double lambda, CostFunction.CostType cost, ActivationType activation, InitializeType init, RegularizationType reg) {
 		this.eta = eta;
 		this.lambda = lambda;
       this.costtype = cost;

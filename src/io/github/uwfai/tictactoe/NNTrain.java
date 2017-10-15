@@ -2,10 +2,8 @@ package io.github.uwfai.tictactoe;
 
 import io.github.uwfai.neural.Matrix;
 import io.github.uwfai.neural.NeuralNetwork;
-import io.github.uwfai.neural.Optimizer;
+import io.github.uwfai.neural.cost.CostFunction;
 
-import java.util.Arrays;
-import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -17,7 +15,7 @@ public final class NNTrain
    private static double lambda = 0.1d;
    private static int inner = 5;
    private static int batchsize = 33;
-   private static NeuralNetwork.CostType ct = NeuralNetwork.CostType.CROSSENTROPY;
+   private static CostFunction.CostType ct = CostFunction.CostType.CROSSENTROPY;
    private static NeuralNetwork.ActivationType at = NeuralNetwork.ActivationType.SIGMOID;
    private static NeuralNetwork.InitializeType it = NeuralNetwork.InitializeType.SMART;
    private static NeuralNetwork.RegularizationType rt = NeuralNetwork.RegularizationType.L2;

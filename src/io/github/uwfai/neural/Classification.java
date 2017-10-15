@@ -1,5 +1,7 @@
 package io.github.uwfai.neural;
 
+import io.github.uwfai.neural.cost.CostFunction;
+
 import java.awt.image.BufferedImage;
 import java.util.Random;
 import javax.imageio.ImageIO;
@@ -13,7 +15,7 @@ public class Classification {
 			.Output(1)
 			.Build(200.0d,
 					1.0d,
-					NeuralNetwork.CostType.QUADRATIC,
+					CostFunction.CostType.QUADRATIC,
 					NeuralNetwork.ActivationType.SIGMOID,
 					NeuralNetwork.InitializeType.SMART,
 					NeuralNetwork.RegularizationType.L2);
