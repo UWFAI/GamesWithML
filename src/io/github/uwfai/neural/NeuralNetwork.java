@@ -24,6 +24,7 @@ import io.github.uwfai.neural.initialization.InitializationFunction;
 import io.github.uwfai.neural.initialization.SmartInitializationFunction;
 import io.github.uwfai.neural.layer.InputLayer;
 import io.github.uwfai.neural.layer.Layer;
+import io.github.uwfai.neural.layer.OutputLayer;
 import io.github.uwfai.neural.regularization.L2RegularizationFunction;
 import io.github.uwfai.neural.regularization.NoRegularizationFunction;
 import io.github.uwfai.neural.regularization.RegularizationFunction;
@@ -76,19 +77,6 @@ public class NeuralNetwork {
 		
 		ConvolutionalLayer(int width, int height) {
 			super(width, height);
-		}
-	}
-
-	/*
-	* The Output layer functions similary to the Feedforward layers, but it must always come last
-	* in your NN because it differentiates for the change in cost due to each output neuron. This
-	* differs from inner layers, and so a special class is necessary. It is linked with the NN
-	* class constructor Output(height).
-	*/
-
-	private class OutputLayer extends Layer {
-		OutputLayer(int height) {
-			super(1, height);
 		}
 	}
 	
