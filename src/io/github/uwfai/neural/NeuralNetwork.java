@@ -36,10 +36,10 @@ public class NeuralNetwork {
 	* networking.
 	*/
 	
-	public static enum CostType { QUADRATIC, CROSSENTROPY };
-	public static enum ActivationType { SIGMOID, RELU, TANH };
-	public static enum InitializeType { DUMB, SMART };
-	public static enum RegularizationType { NONE, L2 };
+	public enum CostType { QUADRATIC, CROSSENTROPY };
+	public enum ActivationType { SIGMOID, RELU, TANH };
+	public enum InitializeType { DUMB, SMART };
+	public enum RegularizationType { NONE, L2 };
 	
 	private class InitializeFunction {
 		public double weight(Random gen, int n) { return 0.0d; }
