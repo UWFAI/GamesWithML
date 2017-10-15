@@ -22,6 +22,7 @@ import io.github.uwfai.neural.cost.QuadraticCostFunction;
 import io.github.uwfai.neural.initialization.DumbInitializationFunction;
 import io.github.uwfai.neural.initialization.InitializationFunction;
 import io.github.uwfai.neural.initialization.SmartInitializationFunction;
+import io.github.uwfai.neural.layer.InputLayer;
 import io.github.uwfai.neural.layer.Layer;
 import io.github.uwfai.neural.regularization.L2RegularizationFunction;
 import io.github.uwfai.neural.regularization.NoRegularizationFunction;
@@ -75,48 +76,6 @@ public class NeuralNetwork {
 		
 		ConvolutionalLayer(int width, int height) {
 			super(width, height);
-		}
-	}
-	
-	/*
-	* The InputLayer is the first layer defined for our network and gives us the functionality of
-	* pushing through a set of values and answers. It is largely different from the Feedforward and
-	* Output layers in that it doesn't provide weights and biases in the same way; the weights are
-	* all 1.0 and the biases are 0.0, since we don't want to modify our inputs through our Input
-	* layer, but rather pass them along into our Feeforward/Convolutional layers.
-	*/
-	
-	private class InputLayer extends Layer {
-		public Matrix feedforward(Matrix activations, ActivationFunction activation, Matrix zs, Matrix as) {
-			as.append(activations);
-			zs.append(activations);
-			return activations;
-		}
-
-		@Override
-		public void initialize(InitializationFunction init, Layer previous, Random gen, int n) {
-			this.weights = new Matrix();
-			this.biases = new Matrix();
-			for (int neuron = 0; neuron < this.size(); ++neuron) {
-				this.weights.append(new Matrix());
-            for (int i = 0; i < this.size(); ++i) {
-               if (neuron == i) {
-                  this.weights.getm(neuron).append(1.0d);
-               } else {
-                  this.weights.getm(neuron).append(0.0d);
-               }
-            }
-				this.biases.append(0.0d);
-			}
-			return;
-		}
-		
-		InputLayer(int width, int height) {
-			super(width, height);
-		}
-		
-		InputLayer(int height) {
-			this(1, height);
 		}
 	}
 
