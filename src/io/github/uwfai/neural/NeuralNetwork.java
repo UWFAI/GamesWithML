@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Random;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
+import io.github.uwfai.neural.interfaces.ActivationFunction;
 import io.github.uwfai.neural.interfaces.CostFunction;
 
 /**
@@ -39,12 +40,6 @@ public class NeuralNetwork {
 	public static enum ActivationType { SIGMOID, RELU, TANH };
 	public static enum InitializeType { DUMB, SMART };
 	public static enum RegularizationType { NONE, L2 };
-	
-	private class ActivationFunction {
-		public double fn(double z) { return 0.0d; }
-		public double prime(double z) { return 0.0d; }
-      public ActivationFunction() { }
-	}
 	
 	private class InitializeFunction {
 		public double weight(Random gen, int n) { return 0.0d; }
@@ -106,7 +101,7 @@ public class NeuralNetwork {
 			as.append(new Matrix());
 			for (int neuron = 0; neuron < this.size(); ++neuron) {
 				double z = activations.product(this.weights.getm(neuron)).sum()+this.biases.getd(neuron);
-				double a = activation.fn(z);
+				double a = activation.activate(z);
 				result.append(a);
 				((Matrix)zs.get(zs.size()-1)).append(z);
 				((Matrix)as.get(as.size()-1)).append(a);
@@ -282,17 +277,18 @@ public class NeuralNetwork {
 		public Matrix derivative(Matrix y, Matrix a) { return y.subtract(a).division(a.product(a.subtract(a.shape().fill(1.0d)))); }
 	}
 
-	private class Tanh extends ActivationFunction {
-      public double fn(double z) { return Math.tanh(z); }
+	private class Tanh implements ActivationFunction
+	{
+      public double activate(double z) { return Math.tanh(z); }
 
-      public double prime(double z) { return 1.0d/Math.pow(Math.cosh(z),2.0d); }
+      public double derivative(double z) { return 1.0d/Math.pow(Math.cosh(z),2.0d); }
    }
 
-	private class Sigmoid extends ActivationFunction {
-		public double fn(double z) { return 1.0d/(1.0d+Math.exp(-z)); }
+	private class Sigmoid implements ActivationFunction {
+		public double activate(double z) { return 1.0d/(1.0d+Math.exp(-z)); }
 
-		public double prime(double z) {
-			return this.fn(z)*(1.0-this.fn(z));
+		public double derivative(double z) {
+			return this.activate(z)*(1.0-this.activate(z));
 		}
 
 		Sigmoid() {
@@ -300,10 +296,10 @@ public class NeuralNetwork {
 		}
 	}
 
-	private class ReLU extends ActivationFunction {
-      public double fn(double z) { return (z > 0 ? z : 0); }
+	private class ReLU implements ActivationFunction {
+      public double activate(double z) { return (z > 0 ? z : 0); }
 
-      public double prime(double z) { return (z > 0 ? 1 : 0); }
+      public double derivative(double z) { return (z > 0 ? 1 : 0); }
 
       ReLU() { return; }
    }
@@ -416,7 +412,7 @@ public class NeuralNetwork {
 		for (int layer = this.layers.size()-1; layer > 0; --layer) {
 			Matrix adjust = new Matrix();
 			for (int neuron = 0; neuron < this.layers.get(layer).size(); ++neuron) {
-				adjust.append(this.activation.prime(zs.getm(layer).getd(neuron)));
+				adjust.append(this.activation.derivative(zs.getm(layer).getd(neuron)));
 			}
 			error.set(0, error.getm(0).product(adjust));
 			
