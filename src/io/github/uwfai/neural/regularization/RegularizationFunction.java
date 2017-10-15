@@ -6,7 +6,7 @@ public interface RegularizationFunction
 {
       enum RegularizationType { NONE, L2 };
 
-      public double reg(Matrix weights);
+      double reg(Matrix weights);
 
-      public Matrix dv(Matrix weights);
+      Matrix dv(Matrix weights);
 }
