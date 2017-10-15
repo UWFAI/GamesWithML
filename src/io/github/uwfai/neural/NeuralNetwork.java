@@ -22,6 +22,7 @@ import io.github.uwfai.neural.cost.QuadraticCostFunction;
 import io.github.uwfai.neural.initialization.DumbInitializationFunction;
 import io.github.uwfai.neural.initialization.InitializationFunction;
 import io.github.uwfai.neural.initialization.SmartInitializationFunction;
+import io.github.uwfai.neural.layer.ConvolutionalLayer;
 import io.github.uwfai.neural.layer.InputLayer;
 import io.github.uwfai.neural.layer.Layer;
 import io.github.uwfai.neural.layer.OutputLayer;
@@ -42,44 +43,6 @@ import io.github.uwfai.neural.regularization.RegularizationFunction;
 * @since 2017-3-3
 */
 public class NeuralNetwork {
-	/*
-	* TODO: convolutional neural network layers. The implementation is simple: for each grid of
-	* neurons that fits the weights structure (defined through the constructor as Convolutional(
-	* width, height)), calculate the difference from the "filter"/"lens" and create a new layer
-	* based on those differences. This reduces a large layer to a smaller layer and provides the
-	* functionality of looking for an overall feature of, say, an image, providing more accurate
-	* networks. Generally, we won't update the filter/lens of our CNN automatically.
-	*/
-	
-	private class ConvolutionalLayer extends Layer {
-		@Override
-		public Matrix feedforward(Matrix activations, ActivationFunction activation, Matrix as, Matrix zs) {
-			return new Matrix();
-		}
-
-		@Override
-		public void initialize(InitializationFunction init, Layer previous, Random gen, int n) {
-			return;
-		}
-
-		public void setFilter(Matrix filter) {
-			try {
-				if (filter.similar(this.weights)) {
-					this.weights = filter;
-				} else {
-					throw new Exception(String.format("filter size doesn't match %dx%d", this.width, this.height));
-				}
-			} catch (Exception e) {
-				System.err.println("Error setting convolutional filter: %s".format(e.getMessage()));
-				e.printStackTrace();
-			}
-		}
-		
-		ConvolutionalLayer(int width, int height) {
-			super(width, height);
-		}
-	}
-	
 	private ArrayList<Layer> layers = new ArrayList<>();
 	private CostFunction cost;
 	private ActivationFunction activation;
