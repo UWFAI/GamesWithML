@@ -13,6 +13,7 @@ import java.util.Random;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import io.github.uwfai.neural.activation.ActivationFunction;
+import io.github.uwfai.neural.activation.SigmoidActivationFunction;
 import io.github.uwfai.neural.activation.TanhActivationFunction;
 import io.github.uwfai.neural.cost.CostFunction;
 import io.github.uwfai.neural.cost.CrossEntropyCostFunction;
@@ -139,18 +140,6 @@ public class NeuralNetwork {
 	private class OutputLayer extends Layer {
 		OutputLayer(int height) {
 			super(1, height);
-		}
-	}
-
-	private class Sigmoid implements ActivationFunction {
-		public double activate(double z) { return 1.0d/(1.0d+Math.exp(-z)); }
-
-		public double derivative(double z) {
-			return this.activate(z)*(1.0-this.activate(z));
-		}
-
-		Sigmoid() {
-			return;
 		}
 	}
 
@@ -566,7 +555,7 @@ public class NeuralNetwork {
          default:
          case SIGMOID:
          {
-            this.activation = new Sigmoid();
+            this.activation = new SigmoidActivationFunction();
             break;
          }
          case RELU:
