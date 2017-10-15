@@ -14,6 +14,7 @@ import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import io.github.uwfai.neural.activation.ActivationFunction;
 import io.github.uwfai.neural.cost.CostFunction;
+import io.github.uwfai.neural.initialization.InitializationFunction;
 
 /**
 * NeuralNetwork library
@@ -37,12 +38,6 @@ public class NeuralNetwork {
 	*/
 	public enum InitializeType { DUMB, SMART };
 	public enum RegularizationType { NONE, L2 };
-	
-	private class InitializeFunction {
-		public double weight(Random gen, int n) { return 0.0d; }
-		public double bias(Random gen, int n) { return 0.0d; }
-      public InitializeFunction() { }
-	}
 	
 	private class RegularizationFunction {
 		public double reg(Matrix weights) { return 0.0d; }
@@ -73,7 +68,7 @@ public class NeuralNetwork {
 			return dim;
 		}
 		
-		public void initialize(InitializeFunction init, LayerClass previous, Random gen, int n) {
+		public void initialize(InitializationFunction init, LayerClass previous, Random gen, int n) {
 			this.biases = new Matrix();
 			this.weights = new Matrix();
 			for (int neuron = 0; neuron < this.size(); ++neuron) {
@@ -167,7 +162,7 @@ public class NeuralNetwork {
 			return new Matrix();
 		}
 		
-		public void initialize(InitializeFunction init, LayerClass previous, Random gen, int n) {
+		public void initialize(InitializationFunction init, LayerClass previous, Random gen, int n) {
 			return;
 		}
 		
@@ -210,7 +205,7 @@ public class NeuralNetwork {
 			return activations;
 		}
 		
-		public void initialize(InitializeFunction init, LayerClass previous, Random gen, int n) {
+		public void initialize(InitializationFunction init, LayerClass previous, Random gen, int n) {
 			this.weights = new Matrix();
 			this.biases = new Matrix();
 			for (int neuron = 0; neuron < this.size(); ++neuron) {
@@ -301,7 +296,7 @@ public class NeuralNetwork {
       ReLU() { return; }
    }
 
-	private class Dumb extends InitializeFunction {
+	private class Dumb implements InitializationFunction {
 		public double weight(Random gen, int n) {
 			return gen.nextDouble()-gen.nextDouble();
 		}
@@ -311,7 +306,7 @@ public class NeuralNetwork {
 		}
 	}
 
-	private class Smart extends InitializeFunction {
+	private class Smart implements InitializationFunction {
 		public double weight(Random gen, int n) {
 			return (gen.nextDouble()-gen.nextDouble())/Math.sqrt(n);
 		}
@@ -361,7 +356,7 @@ public class NeuralNetwork {
 	* the initialization function we choose in the NeuralNetwork constructor.
 	*/
 	
-	public void initialize(InitializeFunction init) {
+	public void initialize(InitializationFunction init) {
 		int size = this.size();
 		for (int layer = 0; layer < this.layers.size(); ++layer) {
 			LayerClass prev = this.layers.get(0);
