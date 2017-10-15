@@ -14,6 +14,7 @@ import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import io.github.uwfai.neural.activation.ActivationFunction;
 import io.github.uwfai.neural.cost.CostFunction;
+import io.github.uwfai.neural.cost.QuadraticCostFunction;
 import io.github.uwfai.neural.initialization.InitializationFunction;
 import io.github.uwfai.neural.layer.Layer;
 import io.github.uwfai.neural.regularization.RegularizationFunction;
@@ -136,16 +137,6 @@ public class NeuralNetwork {
 	private class OutputLayer extends Layer {
 		OutputLayer(int height) {
 			super(1, height);
-		}
-	}
-
-	private class Quadratic implements CostFunction {
-		public double cost(Matrix y, Matrix a) {
-			return 0.5*y.subtract(a).apply((j) -> Math.pow(j, 2.0d)).sum();
-		}
-
-		public Matrix derivative(Matrix y, Matrix a) {
-			return a.subtract(y);
 		}
 	}
 
@@ -576,7 +567,7 @@ public class NeuralNetwork {
          default:
          case QUADRATIC:
          {
-            this.cost = new Quadratic();
+            this.cost = new QuadraticCostFunction();
             break;
          }
          case CROSSENTROPY:
