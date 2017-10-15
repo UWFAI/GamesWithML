@@ -12,8 +12,8 @@ import java.util.ArrayList;
 import java.util.Random;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
-import io.github.uwfai.neural.interfaces.ActivationFunction;
-import io.github.uwfai.neural.interfaces.CostFunction;
+import io.github.uwfai.neural.activation.ActivationFunction;
+import io.github.uwfai.neural.cost.CostFunction;
 
 /**
 * NeuralNetwork library

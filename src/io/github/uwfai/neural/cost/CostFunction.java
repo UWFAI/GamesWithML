@@ -1,4 +1,4 @@
-package io.github.uwfai.neural.interfaces;
+package io.github.uwfai.neural.cost;
 
 import io.github.uwfai.neural.Matrix;
 

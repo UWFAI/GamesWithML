@@ -1,4 +1,4 @@
-package io.github.uwfai.neural.interfaces;
+package io.github.uwfai.neural.activation;
 
 public interface ActivationFunction
 {
