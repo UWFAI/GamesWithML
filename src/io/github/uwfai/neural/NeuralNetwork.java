@@ -14,6 +14,7 @@ import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import io.github.uwfai.neural.activation.ActivationFunction;
 import io.github.uwfai.neural.cost.CostFunction;
+import io.github.uwfai.neural.cost.CrossEntropyCostFunction;
 import io.github.uwfai.neural.cost.QuadraticCostFunction;
 import io.github.uwfai.neural.initialization.InitializationFunction;
 import io.github.uwfai.neural.layer.Layer;
@@ -138,15 +139,6 @@ public class NeuralNetwork {
 		OutputLayer(int height) {
 			super(1, height);
 		}
-	}
-
-	private class CrossEntropy implements CostFunction
-	{
-		public double cost(Matrix y, Matrix a) {
-			return -y.product(a.apply(Math::log)).add(y.shape().fill(1.0d).subtract(y).product(a.shape().fill(1.0d).subtract(a).apply(Math::log))).sum();
-		}
-
-		public Matrix derivative(Matrix y, Matrix a) { return y.subtract(a).division(a.product(a.subtract(a.shape().fill(1.0d)))); }
 	}
 
 	private class Tanh implements ActivationFunction
@@ -572,7 +564,7 @@ public class NeuralNetwork {
          }
          case CROSSENTROPY:
          {
-            this.cost = new CrossEntropy();
+            this.cost = new CrossEntropyCostFunction();
          }
       }
       switch (this.actitype)
