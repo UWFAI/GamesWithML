@@ -19,6 +19,7 @@ import io.github.uwfai.neural.activation.TanhActivationFunction;
 import io.github.uwfai.neural.cost.CostFunction;
 import io.github.uwfai.neural.cost.CrossEntropyCostFunction;
 import io.github.uwfai.neural.cost.QuadraticCostFunction;
+import io.github.uwfai.neural.initialization.DumbInitializationFunction;
 import io.github.uwfai.neural.initialization.InitializationFunction;
 import io.github.uwfai.neural.layer.Layer;
 import io.github.uwfai.neural.regularization.RegularizationFunction;
@@ -141,16 +142,6 @@ public class NeuralNetwork {
 	private class OutputLayer extends Layer {
 		OutputLayer(int height) {
 			super(1, height);
-		}
-	}
-
-	private class Dumb implements InitializationFunction {
-		public double weight(Random gen, int n) {
-			return gen.nextDouble()-gen.nextDouble();
-		}
-		
-		public double bias(Random gen, int n) {
-			return gen.nextDouble()-gen.nextDouble();
 		}
 	}
 
@@ -518,7 +509,7 @@ public class NeuralNetwork {
 			default:
 			case DUMB:
 			{
-				this.initialize(new Dumb());
+				this.initialize(new DumbInitializationFunction());
 				break;
 			}
 			case SMART:
