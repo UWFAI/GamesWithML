@@ -29,14 +29,7 @@ import io.github.uwfai.neural.initialization.InitializationFunction;
 * @since 2017-3-3
 */
 public class NeuralNetwork {
-	/*
-	* These enums provide the outside functionality for selecting the cost type, activation
-	* type, initialization type, and regularization type. Thsee are four important factors
-	* for building an efficient network. It depends on your problem and your network, but
-	* the below implementations of these interfaces are the core of fundamental neural
-	* networking.
-	*/
-	public enum InitializeType { DUMB, SMART };
+	
 	public enum RegularizationType { NONE, L2 };
 	
 	private class RegularizationFunction {
@@ -604,7 +597,7 @@ public class NeuralNetwork {
 	*			double lambda,
 	*			CostType cost,
 	*			ActivationType activation,
-	*			InitializeType init);
+	*			InitializationType init);
 	*
 	* You MUST keep track of the connections you need. Avoiding the counterintuitive design of DL4J,
 	* there is no function/class for connecting layers. Be aware of what sizes of weights you need in
@@ -659,7 +652,7 @@ public class NeuralNetwork {
 		return this;
 	}
 	
-	public NeuralNetwork Build(double eta, double lambda, CostFunction.CostType cost, ActivationFunction.ActivationType activation, InitializeType init, RegularizationType reg) {
+	public NeuralNetwork Build(double eta, double lambda, CostFunction.CostType cost, ActivationFunction.ActivationType activation, InitializationFunction.InitializationType init, RegularizationType reg) {
 		this.eta = eta;
 		this.lambda = lambda;
       this.costtype = cost;

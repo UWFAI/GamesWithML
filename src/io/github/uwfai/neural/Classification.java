@@ -2,6 +2,7 @@ package io.github.uwfai.neural;
 
 import io.github.uwfai.neural.activation.ActivationFunction;
 import io.github.uwfai.neural.cost.CostFunction;
+import io.github.uwfai.neural.initialization.InitializationFunction;
 
 import java.awt.image.BufferedImage;
 import java.util.Random;
@@ -18,7 +19,7 @@ public class Classification {
 					1.0d,
 					CostFunction.CostType.QUADRATIC,
 					ActivationFunction.ActivationType.SIGMOID,
-					NeuralNetwork.InitializeType.SMART,
+					InitializationFunction.InitializationType.SMART,
 					NeuralNetwork.RegularizationType.L2);
 		
 		Random gen = new Random(System.currentTimeMillis());

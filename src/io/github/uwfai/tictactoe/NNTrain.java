@@ -4,6 +4,7 @@ import io.github.uwfai.neural.Matrix;
 import io.github.uwfai.neural.NeuralNetwork;
 import io.github.uwfai.neural.activation.ActivationFunction;
 import io.github.uwfai.neural.cost.CostFunction;
+import io.github.uwfai.neural.initialization.InitializationFunction;
 
 import java.util.Random;
 
@@ -18,7 +19,7 @@ public final class NNTrain
    private static int batchsize = 33;
    private static CostFunction.CostType ct = CostFunction.CostType.CROSSENTROPY;
    private static ActivationFunction.ActivationType at = ActivationFunction.ActivationType.SIGMOID;
-   private static NeuralNetwork.InitializeType it = NeuralNetwork.InitializeType.SMART;
+   private static InitializationFunction.InitializationType it = InitializationFunction.InitializationType.SMART;
    private static NeuralNetwork.RegularizationType rt = NeuralNetwork.RegularizationType.L2;
 
    private static Random gen = new Random();
