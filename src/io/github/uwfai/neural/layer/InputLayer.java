@@ -47,6 +47,5 @@ public class InputLayer extends Layer
          }
          this.biases.append(0.0d);
       }
-      return;
    }
 }
