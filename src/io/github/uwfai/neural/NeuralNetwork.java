@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Random;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
+import io.github.uwfai.neural.interfaces.CostFunction;
 
 /**
 * NeuralNetwork library
@@ -38,12 +39,6 @@ public class NeuralNetwork {
 	public static enum ActivationType { SIGMOID, RELU, TANH };
 	public static enum InitializeType { DUMB, SMART };
 	public static enum RegularizationType { NONE, L2 };
-	
-	private class CostFunction {
-		public double fn(Matrix y, Matrix a) { return 0.0d; }
-		public Matrix delta(Matrix y, Matrix a) { return new Matrix(0.0d); }
-      public CostFunction() { }
-	}
 	
 	private class ActivationFunction {
 		public double fn(double z) { return 0.0d; }
@@ -268,7 +263,7 @@ public class NeuralNetwork {
 		}
 	}
 
-	private class Quadratic extends CostFunction {
+	private class Quadratic implements CostFunction {
 		public double fn(Matrix y, Matrix a) {
 			return 0.5*y.subtract(a).apply((j) -> Math.pow(j, 2.0d)).sum();
 		}
@@ -276,28 +271,21 @@ public class NeuralNetwork {
 		public Matrix delta(Matrix y, Matrix a) {
 			return a.subtract(y);
 		}
-
-		Quadratic() {
-			return;
-		}
 	}
 
-	private class CrossEntropy extends CostFunction {
+	private class CrossEntropy implements CostFunction
+	{
 		public double fn(Matrix y, Matrix a) {
 			return -y.product(a.apply(Math::log)).add(y.shape().fill(1.0d).subtract(y).product(a.shape().fill(1.0d).subtract(a).apply(Math::log))).sum();
 		}
 
 		public Matrix delta(Matrix y, Matrix a) { return y.subtract(a).division(a.product(a.subtract(a.shape().fill(1.0d)))); }
-
-      CrossEntropy() { return; }
 	}
 
 	private class Tanh extends ActivationFunction {
       public double fn(double z) { return Math.tanh(z); }
 
       public double prime(double z) { return 1.0d/Math.pow(Math.cosh(z),2.0d); }
-
-      Tanh() { return; }
    }
 
 	private class Sigmoid extends ActivationFunction {

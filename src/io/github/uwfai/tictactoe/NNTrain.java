@@ -6,20 +6,24 @@ import io.github.uwfai.neural.Optimizer;
 
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Created by carso on 4/13/2017.
  */
 public final class NNTrain
 {
-   private static double eta = 2.0d;
-   private static double lambda = 0.01d;
-   private static int inner = 3;
+   private static double eta = 5.0d;
+   private static double lambda = 0.1d;
+   private static int inner = 5;
    private static int batchsize = 33;
-   private static NeuralNetwork.CostType ct = NeuralNetwork.CostType.QUADRATIC;
-   private static NeuralNetwork.ActivationType at = NeuralNetwork.ActivationType.TANH;
+   private static NeuralNetwork.CostType ct = NeuralNetwork.CostType.CROSSENTROPY;
+   private static NeuralNetwork.ActivationType at = NeuralNetwork.ActivationType.SIGMOID;
    private static NeuralNetwork.InitializeType it = NeuralNetwork.InitializeType.SMART;
    private static NeuralNetwork.RegularizationType rt = NeuralNetwork.RegularizationType.L2;
+
+   private static Random gen = new Random();
+   private static double mutation = 0.01d;
 
    private static NeuralNetwork[] NNs = {
          new NeuralNetwork(),
@@ -33,6 +37,10 @@ public final class NNTrain
          new NeuralNetwork(),
          new NeuralNetwork()
    };
+
+   public static double mutate(double value) {
+      return value+(value*mutation*(gen.nextDouble()-gen.nextDouble()));
+   }
 
    public static void main(String[] args)
    {
@@ -240,10 +248,10 @@ public final class NNTrain
          //NNs[n].save("NN"+n+".json", false);
       }*/
 
-      double[] optietas = {eta, eta, eta, eta, eta, eta};
+      double[] optietas = {4.35, 3.40, 5.00, 4.30, 3.35, 5.10};
       for (int n = 0; n < 6; ++n)
       {
-         NNs[n] = new NeuralNetwork().Input(9).Feedforward(inner).Output(1).Build(optietas[n], lambda, ct, at, it, rt);
+         NNs[n] = new NeuralNetwork().LoadFromFile("NN"+n+".json");
       }
 
       NNs[7] = new NeuralNetwork().Input(6).Feedforward(inner).Output(9).Build(eta, lambda, ct, at, it, rt);
@@ -343,10 +351,13 @@ public final class NNTrain
             ++attempt;
          }
          NNs[7].Load(best);
+         System.out.format("AFTER TRAINING: %.3f\n", NNs[7].evaluate(fdata, ans[7]));
+         NNs[7].save("NN7.json", false);
 
          bestscore = score;
-
-         System.out.format("AFTER TRAINING: %.3f\n", NNs[7].evaluate(fdata, ans[7]));
+         eta = Math.max(0.01d,mutate(eta));
+         lambda = Math.max(0.001d,mutate(lambda));
+         System.out.format("New eta: %.3f; new lambda: %.3f\n", eta, lambda);
       }
    }
 }
