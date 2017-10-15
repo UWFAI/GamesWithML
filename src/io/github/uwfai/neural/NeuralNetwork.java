@@ -13,6 +13,7 @@ import java.util.Random;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import io.github.uwfai.neural.activation.ActivationFunction;
+import io.github.uwfai.neural.activation.ReLUActivationFunction;
 import io.github.uwfai.neural.activation.SigmoidActivationFunction;
 import io.github.uwfai.neural.activation.TanhActivationFunction;
 import io.github.uwfai.neural.cost.CostFunction;
@@ -142,14 +143,6 @@ public class NeuralNetwork {
 			super(1, height);
 		}
 	}
-
-	private class ReLU implements ActivationFunction {
-      public double activate(double z) { return (z > 0 ? z : 0); }
-
-      public double derivative(double z) { return (z > 0 ? 1 : 0); }
-
-      ReLU() { return; }
-   }
 
 	private class Dumb implements InitializationFunction {
 		public double weight(Random gen, int n) {
@@ -560,7 +553,7 @@ public class NeuralNetwork {
          }
          case RELU:
          {
-            this.activation = new ReLU();
+            this.activation = new ReLUActivationFunction();
             break;
          }
          case TANH:
