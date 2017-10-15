@@ -34,7 +34,7 @@ public class NeuralNetwork {
 	* for building an efficient network. It depends on your problem and your network, but
 	* the below implementations of these interfaces are the core of fundamental neural
 	* networking.
-	*/;;
+	*/
 	public enum InitializeType { DUMB, SMART };
 	public enum RegularizationType { NONE, L2 };
 	
