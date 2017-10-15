@@ -8,6 +8,8 @@ import io.github.uwfai.neural.function.RegularizationFunction;
 import io.github.uwfai.neural.layer.Layer;
 
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import javax.imageio.ImageIO;
 import java.io.File;
@@ -27,8 +29,8 @@ public class Classification {
 		
 		Random gen = new Random(System.currentTimeMillis());
 		
-		Matrix data = new Matrix();
-		Matrix answers = new Matrix();
+		List<Matrix> data = new ArrayList<>();
+		List<Matrix> answers = new ArrayList<>();
 		
 		double flux = 0.25;
 		double r = 3.0;
@@ -37,14 +39,12 @@ public class Classification {
 			double theta = 2*Math.PI*gen.nextDouble();
 			double rplus = flux*(gen.nextDouble()-gen.nextDouble());
 			if (gen.nextDouble() > 0.5) {
-				//data.append(new Matrix((R+rplus)*Math.cos(theta), (R+rplus)*Math.sin(theta)));
-				data.append(new Matrix(Math.pow((R+rplus)*Math.cos(theta),2.0d), Math.pow((R+rplus)*Math.sin(theta),2.0d)));
-				answers.append(new Matrix(1.0d));
+				data.add(new Matrix(new double[][]{ new double[]{ Math.pow((R+rplus)*Math.cos(theta),2.0d) }, new double[] { Math.pow((R+rplus)*Math.sin(theta),2.0d) } }));
+				answers.add(new Matrix(new double[][]{ new double[] { 1.0d } }));
 			} else {
 				double tr = (r+rplus)*gen.nextDouble();
-				//data.append(new Matrix((tr)*Math.cos(theta), (tr)*Math.sin(theta)));
-				data.append(new Matrix(Math.pow((tr)*Math.cos(theta),2.0d), Math.pow((tr)*Math.sin(theta),2.0d)));
-				answers.append(new Matrix(0.0d));
+				data.add(new Matrix(new double[][]{ new double[]{ Math.pow((tr)*Math.cos(theta),2.0d) }, new double[] { Math.pow((tr)*Math.sin(theta),2.0d) } }));
+				answers.add(new Matrix(new double[][]{ new double[] { 0.0d } }));
 			}
 		}
 
@@ -57,7 +57,7 @@ public class Classification {
 			for (int xi = 0; xi < width; ++xi) {
 				for (int yi = 0; yi < height; ++yi) {
 					//double v = NN.feedforward(new Matrix((R+r+flux)*(xi-(width/2.0))/(width/2.0), (R+r+flux)*(yi-(height/2.0))/(height/2.0))).getd(0);
-					double v = NN.feedforward(new Matrix(Math.pow((R+r+flux)*(xi-(width/2.0))/(width/2.0),2.0d), Math.pow((R+r+flux)*(yi-(height/2.0))/(height/2.0),2.0d))).getd(0);
+					double v = NN.feedforward(new Matrix(new double[][]{ new double[]{ Math.pow((R+r+flux)*(xi-(width/2.0))/(width/2.0),2.0d) }, new double[]{ Math.pow((R+r+flux)*(yi-(height/2.0))/(height/2.0),2.0d) } })).get(0, 0);
 					int alpha = (int)(255 << 24);
 					int red = (int)(((int)Math.floor((v < 0.5 ? ((0.5-v)/0.5)*255.0 : 0))) << 16);
 					int green = (int)(0 << 8);

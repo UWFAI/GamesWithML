@@ -3,453 +3,258 @@ package io.github.uwfai.neural;
 import com.google.gson.internal.LinkedTreeMap;
 
 import java.util.ArrayList;
-import java.lang.Exception;
-import java.util.concurrent.Callable;
-import java.util.function.DoubleConsumer;
 import java.util.function.Function;
 
 public class Matrix {
-	private ArrayList matrix;
-	
-	public int size() {
-		return this.matrix.size();
+	private int rows;
+	private int columns;
+
+	private double[][] matrix;
+
+	public Matrix(double[][] values) {
+		this.rows = values.length;
+		this.columns = values[0].length;
+		matrix = values;
+	}
+
+	public Matrix(int rows, int columns) {
+		this.rows = rows;
+		this.columns = columns;
+		matrix = new double[rows][columns];
+	}
+
+	public Matrix(int[] dimensions, int start) {
+		this.rows = dimensions[start];
+		this.columns = dimensions[start+1];
+		matrix = new double[rows][columns];
+	}
+
+	public Matrix(int[] dimensions) {
+		this(dimensions, 0);
+	}
+
+	public Matrix (Matrix matrixToCopy) {
+		rows = matrixToCopy.getRows();
+		columns = matrixToCopy.getColumns();
+		matrix = new double[rows][columns];
+
+		for (int row = 0; row < rows; ++row) {
+			for (int column = 0; column < columns; ++column) {
+				set(row, column, matrixToCopy.get(row, column));
+			}
+		}
+	}
+
+	public final int getRows() {
+		return rows;
+	}
+
+	public final int getColumns() {
+		return columns;
+	}
+
+	public final int size() {
+		return rows * columns;
 	}
 	
-	public void set(int index, double value) {
-		this.matrix.set(index, value);
+	public final void set(int row, int column, double value) {
+		this.matrix[row][column] = value;
 	}
-	
-	public void set(int index, Matrix value) {
-		this.matrix.set(index, value);
+
+	public final double get(int row, int column) {
+		return matrix[row][column];
 	}
 	
 	public Matrix shape() {
-		Matrix newmatrix = new Matrix();
-		try {
-			for (Object element : this.matrix) {
-				if (element instanceof Double) {
-					newmatrix.append(0.0d);
-				} else if (element instanceof Matrix) {
-					newmatrix.append(((Matrix)element).shape());
-				} else {
-					throw new Exception("unknown type");
-				}
-			}
-		} catch (Exception e) {
-			System.err.println(String.format("Error getting matrix shape: %s", e.getMessage()));
-			e.printStackTrace();
-		}
-		return newmatrix;
+		return new Matrix(rows, columns);
 	}
 
-	public String print() {
-		String ret = "Matrix(";
-		for (int p = 0; p < this.size(); ++p) {
-			if (this.get(p) instanceof Matrix) {
-            ret += this.getm(p).print();
-         } else if (this.get(p) instanceof Double) {
-            ret += this.getd(p);
-         } else {
-            ret += this.get(p).getClass().getName();
-         }
-			if (p < this.size()-1) {
-				ret += ",";
-			}
-		}
-		return ret+")";
-	}
-
-	public String json() {
+	public final String toString() {
 		String ret = "[";
-		for (int i = 0; i < this.size(); ++i) {
-			if (this.get(i) instanceof Matrix) {
-				ret += this.getm(i).json();
-			} else {
-				ret += Double.toString(this.getd(i));
+		for (int row = 0; row < rows; ++row)
+		{
+			for (int column = 0; column < columns; ++column)
+			{
+				ret = ret.concat(" ".concat(Double.toString(get(row, column))).concat(","));
 			}
-			if (i < this.size()-1) {
-				ret += ",";
+
+			if (row < rows - 1)
+			{
+				ret = ret.concat(",\n ");
 			}
 		}
-		return ret+"]";
-	}
-	
-	public void remove(int index) {
-		this.matrix.remove(index);
+		return ret.concat("]");
 	}
 	
 	public Matrix copy() {
-		Matrix newmatrix = new Matrix();
-		try {
-			for (Object element : this.matrix) {
-				if (element instanceof Double) {
-					newmatrix.append((double)element);
-				} else if (element instanceof Matrix) {
-					newmatrix.append(((Matrix)element).copy());
-				} else {
-					throw new Exception("unknown type");
-				}
+		Matrix result = new Matrix(rows, columns);
+
+		for (int row = 0; row < rows; ++row) {
+			for (int column = 0; column < columns; ++column) {
+				result.set(row, column, get(row, column));
 			}
-		} catch (Exception e) {
-			System.err.println(String.format("Error copying matrix: %s", e.getMessage()));
-			e.printStackTrace();
 		}
-		return newmatrix;
+
+		return result;
 	}
 	
-	public ArrayList clone() {
-		ArrayList newmatrix = new ArrayList();
-		try {
-			for (Object element : this.matrix) {
-				if (element instanceof Double) {
-					newmatrix.add((double)element);
-				} else if (element instanceof Matrix) {
-					newmatrix.add(((Matrix)element).copy());
-				} else {
-					throw new Exception("unknown type ("+element.getClass().getName()+")");
-				}
-			}
-		} catch (Exception e) {
-			System.err.println(String.format("Error cloning matrix: %s", e.getMessage()));
-			e.printStackTrace();
-		}
-		return newmatrix;
+	public final boolean similar(Matrix matrix) {
+		return getRows() == matrix.getRows() && getColumns() == matrix.getColumns();
 	}
 	
-	public boolean similar(Matrix matrix) {
-		boolean sim = true;
-		for (int index = 0; index < this.size(); ++index) {
-			if (this.get(index) instanceof Double) {
-				if (!(matrix.get(index) instanceof Double)) {
-					return false;
+	public final Matrix dot(Matrix other) throws RuntimeException {
+		if (getRows() != other.getRows() || getColumns() != other.getColumns()) {
+			throw new RuntimeException(String.format("Cannot produce cross product of matrices due to conflicting sizes: %dx%d vs %dx%d", getRows(), getColumns(), other.getRows(), other.getColumns()));
+		}
+
+		Matrix result = new Matrix(rows, other.getColumns());
+
+		for (int row = 0; row < rows; ++row) {
+			for (int column = 0; column < columns; ++column) {
+				double sum = 0.0d;
+
+				for (int multiply = 0; multiply < columns; ++multiply) {
+					sum += get(row, multiply) * other.get(column, multiply);
 				}
-			} else {
-				if (matrix.get(index) instanceof Matrix) {
-					sim &= ((Matrix)matrix.get(index)).similar((Matrix)matrix.get(index));
-				} else {
-					return false;
-				}
+
+				result.set(row, column, sum);
 			}
 		}
-		return sim;
-	}
-	
-	public Matrix column(int col) {
-		Matrix newmatrix = new Matrix();
-		try {
-			for (int index = 0; index < this.size(); ++index) {
-				if (this.get(index) instanceof Matrix && ((Matrix)this.get(0)).similar((Matrix)this.get(index))) {
-					if (((Matrix)this.get(index)).get(col) instanceof Matrix) {
-						newmatrix.append((Matrix)((Matrix)this.get(index)).get(col));
-					} else if (((Matrix)this.get(index)).get(col) instanceof Double) {
-						newmatrix.append((double)((Matrix)this.get(index)).get(col));
-					} else {
-						throw new Exception("unknown type");
-					}
-				} else {
-					throw new Exception("not all elements are matrices and similar");
-				}
-			}
-		} catch (Exception e) {
-			System.err.println(String.format("Error getting matrix column: %s", e.getMessage()));
-			e.printStackTrace();
-		}
-		return newmatrix;
-	}
-	
-	public Matrix flip() {
-		Matrix newmatrix = new Matrix();
-		try {
-			for (int col = 0; col < ((Matrix)this.get(0)).size(); ++col) {
-				newmatrix.append(this.column(col));
-			}
-		} catch (Exception e) {
-			System.err.println(String.format("Error flipping matrix: %s", e.getMessage()));
-			e.printStackTrace();
-		}
-		return newmatrix;
-	}
-	
-	public Object get(int index) {
-		Object obj = new Object();
-		try {
-			if (index < this.matrix.size() && index >= 0) {
-				obj = this.matrix.get(index);
-			} else {
-				throw new Exception(String.format("index %d out of matrix bounds", index));
-			}
-		} catch (Exception e) {
-			System.err.println(String.format("Error getting element: %s", e.getMessage()));
-			e.printStackTrace();
-		}
-		return obj;
-	}
-	
-	public Matrix product(Matrix m) {
-		Matrix newmatrix = new Matrix();
-		try {
-			if (this.similar(m)) {
-				for (int index = 0; index < this.size(); ++index) {
-					if (this.get(index) instanceof Matrix) {
-						newmatrix.append(((Matrix)this.get(index)).product((Matrix)m.get(index)));
-					} else if (this.get(index) instanceof Double){
-						newmatrix.append((double)this.get(index)*(double)m.get(index));
-					} else {
-                  throw new Exception("unknown type");
-               }
-				}
-			} else {
-				throw new Exception("matrices not the same shape for Hadamard product");
-			}
-		} catch (Exception e) {
-			System.err.println(String.format("Error performing Hadamard product: %s", e.getMessage()));
-			e.printStackTrace();
-		}
-		return newmatrix;
+
+		return result;
 	}
 
-	public Matrix division(Matrix m) {
-      Matrix newmatrix = new Matrix();
-      try {
-         if (this.similar(m)) {
-            for (int index = 0; index < this.size(); ++index) {
-               if (this.get(index) instanceof Matrix) {
-                  newmatrix.append(((Matrix)this.get(index)).product((Matrix)m.get(index)));
-               } else if (this.get(index) instanceof Double) {
-                  newmatrix.append((double)this.get(index)/(double)m.get(index));
-               } else {
-                  throw new Exception("unknown type");
-               }
-            }
-         } else {
-            throw new Exception("matrices not the same shape for Hadamard division");
-         }
-      } catch (Exception e) {
-         System.err.println(String.format("Error performing Hadamard division: %s", e.getMessage()));
-         e.printStackTrace();
-      }
-      return newmatrix;
+	public final Matrix add(Matrix other) {
+		checkIfSimilar(other);
+
+		Matrix result = new Matrix(rows, columns);
+
+		for (int row = 0; row < rows; ++row) {
+			for (int column = 0; column < columns; ++column) {
+				result.set(row, column, get(row, column) + other.get(row, column));
+			}
+		}
+
+		return result;
+	}
+
+	public final Matrix subtract(Matrix other) {
+		checkIfSimilar(other);
+
+		Matrix result = new Matrix(rows, columns);
+
+		for (int row = 0; row < rows; ++row) {
+			for (int column = 0; column < columns; ++column) {
+				result.set(row, column, get(row, column) - other.get(row, column));
+			}
+		}
+
+		return result;
+	}
+
+	public final Matrix divide(Matrix other) {
+		checkIfSimilar(other);
+
+		Matrix result = new Matrix(rows, columns);
+
+		for (int row = 0; row < rows; ++row) {
+			for (int column = 0; column < columns; ++column) {
+				result.set(row, column, get(row, column) / other.get(row, column));
+			}
+		}
+
+      return result;
    }
-	
-	public double sum() {
-		double total = 0.0d;
-		try {
-			for (int index = 0; index < this.size(); ++index) {
-				if (this.get(index) instanceof Matrix) {
-					total += ((Matrix)this.get(index)).sum();
-				} else if (this.get(index) instanceof Double) {
-					total += (double)this.get(index);
-				} else {
-					throw new Exception("element type unknown");
-				}
-			}
-		} catch (Exception e) {
-			System.err.println(String.format("Error performing matrix sum: %s", e.getMessage()));
-			e.printStackTrace();
-		}
-		return total;
-	}
-	
-	public Matrix append(double value) {
-		this.matrix.add(value);
-		return this;
-	}
-	
-	public Matrix append(Matrix value) {
-		this.matrix.add(value);
-		return this;
-	}
-	
-	public Matrix prepend(double value) {
-		this.matrix.add(0,value);
-		return this;
-	}
-	
-	public Matrix prepend(Matrix value) {
-		this.matrix.add(0,value);
-		return this;
-	}
 
-	public Matrix mapply(Function<Matrix,Matrix> f) {
-		Matrix newmatrix = new Matrix();
-		try {
-			for (int index = 0; index < this.size(); ++index) {
-            if (this.get(index) instanceof Matrix)
-            {
-               newmatrix.append(f.apply(this.getm(index)));
-            } else {
-               throw new Exception("can't apply matrix-only function to non-matrix");
-            }
-			}
-		}
-		catch (Exception e)
-		{
-         System.err.println("Failed mapplying to Matrix: %s".format(e.getMessage()));
-         e.printStackTrace();
-		}
-		return newmatrix;
-	}
+	public final Matrix multiply(Matrix other) {
+		checkIfSimilar(other);
 
-	public Matrix apply(Function<Double,Double> f) {
-      Matrix newmatrix = new Matrix();
-      try {
-         for (int index = 0; index < this.size(); ++index) {
-            if (this.get(index) instanceof Matrix) {
-               newmatrix.append(this.getm(index).apply(f));
-            } else if (this.get(index) instanceof Double) {
-               newmatrix.append(f.apply(this.getd(index)));
-            } else {
-               throw new Exception("unknown type");
-            }
-         }
+		Matrix result = new Matrix(rows, columns);
+
+      for (int row = 0; row < rows; ++row) {
+      	for (int column = 0; column < columns; ++column) {
+      		result.set(row, column, get(row, column) * other.get(row, column));
+	      }
       }
-      catch (Exception e)
-      {
-         System.err.println("cannot apply function to matrix: %s".format(e.getMessage()));
-         e.printStackTrace();
+
+      return result;
+   }
+
+	public final Matrix apply(Function<Double, Double> function) {
+      Matrix result = new Matrix(rows, columns);
+
+      for (int row = 0; row < rows; ++row) {
+      	for (int column = 0; column < columns; ++column) {
+      		set(row, column, function.apply(get(row, column)));
+	      }
       }
-      return newmatrix;
+
+      return result;
    }
 
 	public Matrix fill(double value) {
-      try
-      {
-         for (int index = 0; index < this.size(); ++index)
-         {
-            if (this.get(index) instanceof Matrix) {
-               this.getm(index).fill(value);
-            } else if (this.get(index) instanceof Double) {
-               this.set(index, value);
-            } else {
-               throw new Exception("unknown type");
-            }
-         }
-      }
-      catch (Exception e)
-      {
-         System.err.println("Failed to fill matrix: %s".format(e.getMessage()));
-         e.printStackTrace();
-      }
+		for (int row = 0; row < rows; ++row) {
+			for (int column = 0; column < columns; ++column) {
+				set(row, column, value);
+			}
+		}
+
       return this;
    }
-	
-	public Matrix add(Matrix matrix) {
-		Matrix newmatrix = new Matrix();
-		try {
-			if (this.similar(matrix)) {
-				for (int index = 0; index < this.size(); ++index) {
-					if (this.get(index) instanceof Matrix) {
-						newmatrix.append(((Matrix)this.get(index)).add((Matrix)matrix.get(index)));
-					} else {
-						newmatrix.append((double)this.get(index)+(double)matrix.get(index));
-					}
-				}
-			} else {
-				throw new Exception("matrices are not the same shape");
-			}
-		} catch (Exception e) {
-			System.err.println(String.format("Error adding matrices: %s", e.getMessage()));
-			e.printStackTrace();
-		}
-		return newmatrix;
-	}
-	
-	public Matrix subtract(Matrix matrix) {
-		Matrix newmatrix = new Matrix();
-		try {
-			if (this.similar(matrix)) {
-				for (int index = 0; index < this.size(); ++index) {
-					if (this.get(index) instanceof Matrix) {
-						newmatrix.append(((Matrix)this.get(index)).subtract((Matrix)matrix.get(index)));
-					} else {
-						newmatrix.append((double)this.get(index)-(double)matrix.get(index));
-					}
-				}
-			} else {
-				throw new Exception("matrices are not the same shape");
-			}
-		} catch (Exception e) {
-			System.err.println(String.format("Error subracting matrices: %s", e.getMessage()));
-			e.printStackTrace();
-		}
-		return newmatrix;
-	}
-	
-	public Matrix getm(int index) {
-		Matrix result = new Matrix();
-		try {
-			if (index < this.size() && index >= 0) {
-				if (this.get(index) instanceof Matrix) {
-					result = (Matrix)this.get(index);
-				} else {
-					throw new Exception("item at index is not matrix - it's ("+this.get(index).getClass().getName()+")");
-				}
-			} else {
-				throw new Exception("index "+index+" out of matrix bounds");
-			}
-		} catch (Exception e) {
-			System.err.println(String.format("Error strict-Matrix getting from matrix: %s", e.getMessage()));
-			e.printStackTrace();
-		}
-		return result;
-	}
 
-	public double getd(int index) {
+   public double sum() {
 		double result = 0.0d;
-		try {
-			if (index < this.size() && index >= 0) {
-				if (this.get(index) instanceof Double) {
-					result = (double)this.get(index);
-				} else {
-					throw new Exception("item at index is not double - it's ("+this.get(index).getClass().getName()+")");
-				}
-			} else {
-				throw new Exception("index "+index+" out of matrix bounds");
+
+		for (int row = 0; row < rows; ++row) {
+			for (int column = 0; column < columns; ++column) {
+				result += get(row, column);
 			}
-		} catch (Exception e) {
-			System.err.println(String.format("Error strict-Double getting from matrix: %s", e.getMessage()));
-			e.printStackTrace();
 		}
+
 		return result;
-	}
-
-	public void insert(int index, Double db) {
-      this.matrix.add(index, db);
    }
 
-   public void insert(int index, Matrix mx) {
-      this.matrix.add(index, mx);
+   public Matrix sum(int axis) {
+		Matrix result;
+
+		switch (axis) {
+		case 0:
+		{
+			result = new Matrix(1, columns);
+			for (int row = 0; row < rows; ++row)
+			{
+				for (int column = 0; column < columns; ++column)
+				{
+					result.set(0, column, result.get(0, column) + get(row, column));
+				}
+			}
+			break;
+		}
+		case 1:
+		{
+			result = new Matrix(rows, 1);
+			for (int column = 0; column < columns; ++column)
+			{
+				for (int row = 0; row < rows; ++row)
+				{
+					result.set(row, 0, result.get(row, 0) + get(row, column));
+				}
+			}
+			break;
+		}
+		default:
+		{
+			result = shape();
+			break;
+		}
+		}
+
+		return result;
    }
 
-	public void check() {
-      for (int index = 0; index < this.size(); ++index) {
-         if (this.get(index) instanceof LinkedTreeMap) {
-            this.insert(index, GsonConvert.convert((LinkedTreeMap)this.get(index)));
-            this.remove(index+1);
-         }
-      }
-	}
-	
-	public Matrix(double... values) {
-		this.matrix = new ArrayList();
-		for (double value : values) {
-			matrix.add(value);
+	private void checkIfSimilar(Matrix other) throws RuntimeException {
+		if (!similar(other)) {
+			throw new RuntimeException(String.format("Matrices are not same size: %dx%d vs %dx%d", getRows(), getColumns(), other.getRows(), other.getColumns()));
 		}
-	}
-
-	public Matrix (Matrix matrix1, Matrix... matrices) {
-		this.matrix = new ArrayList();
-		this.matrix.add(matrix1);
-		for (Matrix nmatrix : matrices) {
-			this.matrix.add(nmatrix);
-		}
-	}
-	
-	public Matrix(Matrix matrix) {
-		this.matrix = matrix.clone();
-	}
-	
-	public Matrix() {
-		this.matrix = new ArrayList();
 	}
 }

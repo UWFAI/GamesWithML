@@ -4,8 +4,8 @@ import com.google.gson.Gson;
 import io.github.uwfai.neural.Matrix;
 import io.github.uwfai.neural.function.ActivationFunction;
 import io.github.uwfai.neural.function.InitializationFunction;
-import io.github.uwfai.neural.function.RegularizationFunction;
 
+import java.util.List;
 import java.util.Random;
 
 public class Layer
@@ -27,23 +27,28 @@ public class Layer
    }
 
    public int size() {
-      return this.width*this.height;
+      return this.height*this.width;
    }
 
    public int[] dimensions() {
-      return new int[] { this.width, this.height };
+      return new int[] { this.height, this.width };
    }
 
    public void initialize(InitializationFunction init, int[] previousSize, Random gen, int n) {
-      this.biases = new Matrix();
-      this.weights = new Matrix();
-      for (int neuron = 0; neuron < this.size(); ++neuron) {
-         Matrix nweights = new Matrix();
-         this.biases.append(init.bias(gen, n));
-         for (int prev = 0; prev < previousSize[0] * previousSize[1]; ++prev) {
-            nweights.append(init.weight(gen, n));
+      this.biases = new Matrix(this.height, this.width);
+      this.weights = new Matrix(this.height, this.width);
+
+      for (int row = 0; row < height; ++row)
+      {
+         for (int column = 0; column < width; ++column)
+         {
+            this.biases.set(row, column, init.bias(gen, n));
+
+            for (int prev = 0; prev < previousSize[0] * previousSize[1]; ++prev)
+            {
+               this.weights.set(row, prev, init.weight(gen, n));
+            }
          }
-         this.weights.append(nweights);
       }
    }
 
@@ -55,31 +60,19 @@ public class Layer
       return new Matrix(this.biases);
    }
 
-   public Matrix feedforward(Matrix activations, Matrix zs, Matrix as) {
-      Matrix result = new Matrix();
-      zs.append(new Matrix());
-      as.append(new Matrix());
-      for (int neuron = 0; neuron < this.size(); ++neuron) {
-         double z = activations.product(this.weights.getm(neuron)).sum()+this.biases.getd(neuron);
-         double a = activation.activate(z);
-         result.append(a);
-         ((Matrix)zs.get(zs.size()-1)).append(z);
-         ((Matrix)as.get(as.size()-1)).append(a);
-      }
-      return result;
+   public Matrix feedforward(Matrix activations, List<Matrix> zs, List<Matrix> as) {
+      Matrix input = weights.dot(activations).add(biases);
+      Matrix output = activation.activate(input);
+
+      zs.add(input);
+      as.add(output);
+
+      return output;
    }
 
    public void update(Matrix nabla_b, Matrix nabla_w) {
       this.weights = this.weights.subtract(nabla_w);
       this.biases = this.biases.subtract(nabla_b);
-   }
-
-   public final double activationDerivative(double activation) {
-      return this.activation.derivative(activation);
-   }
-
-   public void check() {
-      this.weights.check();
    }
 
    public String json() {

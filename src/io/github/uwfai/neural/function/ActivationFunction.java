@@ -1,5 +1,7 @@
 package io.github.uwfai.neural.function;
 
+import io.github.uwfai.neural.Matrix;
+
 public enum ActivationFunction
 {
    SIGMOID
@@ -48,4 +50,12 @@ public enum ActivationFunction
    abstract public double activate(double z);
 
    abstract public double derivative(double z);
+
+   public final Matrix activate(Matrix z) {
+      return z.apply(this::activate);
+   }
+
+   public final Matrix derivative(Matrix z) {
+      return z.apply(this::derivative);
+   }
 }
