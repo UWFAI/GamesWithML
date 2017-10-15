@@ -15,6 +15,7 @@ import com.google.gson.reflect.TypeToken;
 import io.github.uwfai.neural.activation.ActivationFunction;
 import io.github.uwfai.neural.cost.CostFunction;
 import io.github.uwfai.neural.initialization.InitializationFunction;
+import io.github.uwfai.neural.layer.Layer;
 import io.github.uwfai.neural.regularization.RegularizationFunction;
 
 /**
@@ -31,90 +32,15 @@ import io.github.uwfai.neural.regularization.RegularizationFunction;
 */
 public class NeuralNetwork {
 	/*
-	* To implement our layers, we have the default functions defined here. They are fairly
-	* basic, but because, specifically, our Feedforward and Output layers share most traits
-	* about how they operate, we define our LayerClass with basic definitions in order to ensure
-	* that the Layer interface is implemented for all layers, even if custom feedforward and
-	* initializations functions aren't specifically defined for each class of layer.
-	*/
-	
-	private abstract class LayerClass {
-		Matrix weights;
-		Matrix biases;
-		int width;
-		int height;
-		
-		public int size() {
-			return this.width*this.height;
-		}
-		
-		public int[] dimensions() {
-			int[] dim = { this.width, this.height };
-			return dim;
-		}
-		
-		public void initialize(InitializationFunction init, LayerClass previous, Random gen, int n) {
-			this.biases = new Matrix();
-			this.weights = new Matrix();
-			for (int neuron = 0; neuron < this.size(); ++neuron) {
-				Matrix nweights = new Matrix();
-				this.biases.append(init.bias(gen, n));
-				for (int prev = 0; prev < previous.size(); ++prev) {
-					nweights.append(init.weight(gen, n));
-				}
-				this.weights.append(nweights);
-			}
-		}
-		
-		public Matrix getWeights() {
-			return new Matrix(this.weights);
-		}
-
-		public Matrix getBiases() { return new Matrix(this.biases); }
-		
-		public Matrix feedforward(Matrix activations, ActivationFunction activation, Matrix zs, Matrix as) {
-			Matrix result = new Matrix();
-			zs.append(new Matrix());
-			as.append(new Matrix());
-			for (int neuron = 0; neuron < this.size(); ++neuron) {
-				double z = activations.product(this.weights.getm(neuron)).sum()+this.biases.getd(neuron);
-				double a = activation.activate(z);
-				result.append(a);
-				((Matrix)zs.get(zs.size()-1)).append(z);
-				((Matrix)as.get(as.size()-1)).append(a);
-			}
-			return result;
-		}
-		
-		public void update(Matrix nabla_b, Matrix nabla_w) {
-			this.weights = this.weights.subtract(nabla_w);
-			this.biases = this.biases.subtract(nabla_b);
-		}
-
-		public void check() {
-         this.weights.check();
-      }
-
-		public String json() {
-         Gson gson = new Gson();
-         return gson.toJson(this);
-		}
-		
-		LayerClass(int width, int height) {
-			this.width = width;
-			this.height = height;
-		}
-	}
-	
-	/*
-	* The feeforward layer is the core part of our neural networks. Feedforward layers do exactly
+	* The feedforward layer is the core part of our neural networks. Feedforward layers do exactly
 	* what the name says - they push the input through the network to deliver your output. They
 	* implement the default functions in the LayerClass, only providing the constructor which
 	* tells the LayerClass that it is of 1 width (only one column) and a certain height, as
 	* defined by the user with the constructor Layer(height).
 	*/
-	
-	private final class FeedforwardLayer extends LayerClass {
+
+	private final class FeedforwardLayer extends Layer
+	{
 		FeedforwardLayer(int height) {
 			super(1, height);
 		}
@@ -129,15 +55,17 @@ public class NeuralNetwork {
 	* networks. Generally, we won't update the filter/lens of our CNN automatically.
 	*/
 	
-	private class ConvolutionalLayer extends LayerClass {
+	private class ConvolutionalLayer extends Layer {
+		@Override
 		public Matrix feedforward(Matrix activations, ActivationFunction activation, Matrix as, Matrix zs) {
 			return new Matrix();
 		}
-		
-		public void initialize(InitializationFunction init, LayerClass previous, Random gen, int n) {
+
+		@Override
+		public void initialize(InitializationFunction init, Layer previous, Random gen, int n) {
 			return;
 		}
-		
+
 		public void setFilter(Matrix filter) {
 			try {
 				if (filter.similar(this.weights)) {
@@ -164,14 +92,15 @@ public class NeuralNetwork {
 	* layer, but rather pass them along into our Feeforward/Convolutional layers.
 	*/
 	
-	private class InputLayer extends LayerClass {
+	private class InputLayer extends Layer {
 		public Matrix feedforward(Matrix activations, ActivationFunction activation, Matrix zs, Matrix as) {
 			as.append(activations);
 			zs.append(activations);
 			return activations;
 		}
-		
-		public void initialize(InitializationFunction init, LayerClass previous, Random gen, int n) {
+
+		@Override
+		public void initialize(InitializationFunction init, Layer previous, Random gen, int n) {
 			this.weights = new Matrix();
 			this.biases = new Matrix();
 			for (int neuron = 0; neuron < this.size(); ++neuron) {
@@ -204,7 +133,7 @@ public class NeuralNetwork {
 	* class constructor Output(height).
 	*/
 
-	private class OutputLayer extends LayerClass {
+	private class OutputLayer extends Layer {
 		OutputLayer(int height) {
 			super(1, height);
 		}
@@ -301,7 +230,7 @@ public class NeuralNetwork {
 		NoRegularization() { return; }
 	}
 	
-	private ArrayList<LayerClass> layers = new ArrayList<LayerClass>();
+	private ArrayList<Layer> layers = new ArrayList<>();
 	private CostFunction cost;
 	private ActivationFunction activation;
 	private RegularizationFunction regularization;
@@ -320,7 +249,7 @@ public class NeuralNetwork {
 	public void initialize(InitializationFunction init) {
 		int size = this.size();
 		for (int layer = 0; layer < this.layers.size(); ++layer) {
-			LayerClass prev = this.layers.get(0);
+			Layer prev = this.layers.get(0);
 			if (layer > 0) { prev = this.layers.get(layer-1); }
 			this.layers.get(layer).initialize(init, prev, this.gen, size);
 		}
@@ -332,7 +261,7 @@ public class NeuralNetwork {
 	*/
 	
 	public Matrix feedforward(Matrix activations, Matrix zs, Matrix as) {
-		for (LayerClass layer : this.layers) {
+		for (Layer layer : this.layers) {
 			activations = layer.feedforward(activations, this.activation, zs, as);
 		}
 		return activations;
