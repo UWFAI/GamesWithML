@@ -1,16 +1,6 @@
 package io.github.uwfai.neural;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Random;
-import com.google.gson.*;
+import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import io.github.uwfai.neural.activation.ActivationFunction;
 import io.github.uwfai.neural.activation.ReLUActivationFunction;
@@ -29,6 +19,16 @@ import io.github.uwfai.neural.layer.OutputLayer;
 import io.github.uwfai.neural.regularization.L2RegularizationFunction;
 import io.github.uwfai.neural.regularization.NoRegularizationFunction;
 import io.github.uwfai.neural.regularization.RegularizationFunction;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Random;
 
 /**
 * NeuralNetwork library
