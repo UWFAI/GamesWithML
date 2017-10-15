@@ -23,6 +23,7 @@ import io.github.uwfai.neural.initialization.DumbInitializationFunction;
 import io.github.uwfai.neural.initialization.InitializationFunction;
 import io.github.uwfai.neural.initialization.SmartInitializationFunction;
 import io.github.uwfai.neural.layer.Layer;
+import io.github.uwfai.neural.regularization.L2RegularizationFunction;
 import io.github.uwfai.neural.regularization.RegularizationFunction;
 
 /**
@@ -144,18 +145,6 @@ public class NeuralNetwork {
 		OutputLayer(int height) {
 			super(1, height);
 		}
-	}
-
-	public class L2Regularization implements RegularizationFunction {
-		public double reg(Matrix weights) {
-			return 0.5*weights.apply((j) -> Math.pow(j,2.0d)).sum();
-		}
-
-		public Matrix dv(Matrix weights) {
-			return weights;
-		}
-
-		L2Regularization() { return; }
 	}
 
 	public class NoRegularization implements RegularizationFunction
@@ -548,7 +537,7 @@ public class NeuralNetwork {
 	      default:
 	      case L2:
 	      {
-		      this.regularization = new L2Regularization();
+		      this.regularization = new L2RegularizationFunction();
 		      break;
 	      }
          case NONE:
