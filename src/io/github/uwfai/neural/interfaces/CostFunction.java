@@ -4,7 +4,7 @@ import io.github.uwfai.neural.Matrix;
 
 public interface CostFunction
 {
-   public double fn(Matrix y, Matrix a);
+   public double cost(Matrix y, Matrix a);
 
-   public Matrix delta(Matrix y, Matrix a);
+   public Matrix derivative(Matrix y, Matrix a);
 }

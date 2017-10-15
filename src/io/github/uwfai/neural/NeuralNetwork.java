@@ -264,22 +264,22 @@ public class NeuralNetwork {
 	}
 
 	private class Quadratic implements CostFunction {
-		public double fn(Matrix y, Matrix a) {
+		public double cost(Matrix y, Matrix a) {
 			return 0.5*y.subtract(a).apply((j) -> Math.pow(j, 2.0d)).sum();
 		}
 
-		public Matrix delta(Matrix y, Matrix a) {
+		public Matrix derivative(Matrix y, Matrix a) {
 			return a.subtract(y);
 		}
 	}
 
 	private class CrossEntropy implements CostFunction
 	{
-		public double fn(Matrix y, Matrix a) {
+		public double cost(Matrix y, Matrix a) {
 			return -y.product(a.apply(Math::log)).add(y.shape().fill(1.0d).subtract(y).product(a.shape().fill(1.0d).subtract(a).apply(Math::log))).sum();
 		}
 
-		public Matrix delta(Matrix y, Matrix a) { return y.subtract(a).division(a.product(a.subtract(a.shape().fill(1.0d)))); }
+		public Matrix derivative(Matrix y, Matrix a) { return y.subtract(a).division(a.product(a.subtract(a.shape().fill(1.0d)))); }
 	}
 
 	private class Tanh extends ActivationFunction {
@@ -411,7 +411,7 @@ public class NeuralNetwork {
 		Matrix rs = this.feedforward(data, zs, as);
 		Matrix error = new Matrix();
 		
-		error.prepend(cost.delta(answers, as.getm(as.size()-1)));
+		error.prepend(cost.derivative(answers, as.getm(as.size()-1)));
 		
 		for (int layer = this.layers.size()-1; layer > 0; --layer) {
 			Matrix adjust = new Matrix();
@@ -535,7 +535,7 @@ public class NeuralNetwork {
       double total = 0.0d;
       for (int i = 0; i < data.size(); ++i) {
          Matrix a = this.feedforward(data.getm(i));
-         total += this.cost.fn(answers.getm(i), a);
+         total += this.cost.cost(answers.getm(i), a);
       }
       double reg = 0.0d;
       for (int l = 0; l < this.layers.size(); ++l) {
