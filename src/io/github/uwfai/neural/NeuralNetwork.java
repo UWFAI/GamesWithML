@@ -13,6 +13,7 @@ import java.util.Random;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import io.github.uwfai.neural.activation.ActivationFunction;
+import io.github.uwfai.neural.activation.TanhActivationFunction;
 import io.github.uwfai.neural.cost.CostFunction;
 import io.github.uwfai.neural.cost.CrossEntropyCostFunction;
 import io.github.uwfai.neural.cost.QuadraticCostFunction;
@@ -140,13 +141,6 @@ public class NeuralNetwork {
 			super(1, height);
 		}
 	}
-
-	private class Tanh implements ActivationFunction
-	{
-      public double activate(double z) { return Math.tanh(z); }
-
-      public double derivative(double z) { return 1.0d/Math.pow(Math.cosh(z),2.0d); }
-   }
 
 	private class Sigmoid implements ActivationFunction {
 		public double activate(double z) { return 1.0d/(1.0d+Math.exp(-z)); }
@@ -582,7 +576,7 @@ public class NeuralNetwork {
          }
          case TANH:
          {
-            this.activation = new Tanh();
+            this.activation = new TanhActivationFunction();
             break;
          }
       }
