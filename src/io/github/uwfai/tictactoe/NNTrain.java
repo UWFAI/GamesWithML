@@ -8,7 +8,10 @@ import io.github.uwfai.neural.function.InitializationFunction;
 import io.github.uwfai.neural.function.RegularizationFunction;
 import io.github.uwfai.neural.layer.Layer;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 /**
  * Created by carso on 4/13/2017.
@@ -35,147 +38,157 @@ public final class NNTrain
 
    public static void main(String[] args)
    {
+      ArrayList<Matrix> alData = new ArrayList<>();
 
-      Matrix[] ans = {new Matrix(), new Matrix(), new Matrix(), new Matrix(), new Matrix(), new Matrix(), new Matrix(), new Matrix(), new Matrix(),
-            new Matrix()};
+      alData.addAll(Arrays.stream(Data.data).map((d) -> new Matrix(d, true)).collect(Collectors.toList()));
 
-      Matrix[] answ = {Data.answ0, Data.answ1, Data.answ2, Data.answ3, Data.answ4, Data.answ5, Data.answ6, Data.answ7, Data.answ8, Data.answ9};
+      ArrayList[] ans = {
+            new ArrayList<Matrix>(),
+            new ArrayList<Matrix>(),
+            new ArrayList<Matrix>(),
+            new ArrayList<Matrix>(),
+            new ArrayList<Matrix>(),
+            new ArrayList<Matrix>(),
+            new ArrayList<Matrix>(),
+            new ArrayList<Matrix>(),
+            new ArrayList<Matrix>(),
+            new ArrayList<Matrix>()
+      };
+
+      int[][] answ = {Data.answ0, Data.answ1, Data.answ2, Data.answ3, Data.answ4, Data.answ5, Data.answ6, Data.answ7, Data.answ8, Data.answ9};
 
       int[] ansi = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 
       // GENERATE DATA FOR VERTICAL+HORIZONTAL NETWORK STRUCTURE
       for (int i = 0; i < 852; ++i)
       {
-         if (answ[0].getd(ansi[0]) == (double) i)
+         if (answ[0][ansi[0]] == i)
          {
-            ans[0].append(new Matrix(1.0d));
-            ans[3].append(new Matrix(1.0d));
-            ansi[0] = (ansi[0] + 1 < answ[0].size() ? ansi[0] + 1 : ansi[0]);
+            ans[0].add(new Matrix(new double[][]{new double[]{1.0d}}));
+            ans[3].add(new Matrix(new double[][]{new double[]{1.0d}}));
+            ansi[0] = (ansi[0] + 1 < answ[0].length ? ansi[0] + 1 : ansi[0]);
             for (int x = 0; x < 6; ++x)
             {
                if (x != 0 && x != 3)
                {
-                  ans[x].append(new Matrix(0.0d));
+                  ans[x].add(new Matrix(new double[][]{new double[]{0.0d}}));
                }
             }
          }
-         else if (answ[1].getd(ansi[1]) == (double) i)
+         else if (answ[1][ansi[1]] == i)
          {
-            ans[0].append(new Matrix(1.0d));
-            ans[4].append(new Matrix(1.0d));
-            ansi[1] = (ansi[1] + 1 < answ[1].size() ? ansi[1] + 1 : ansi[1]);
+            ans[0].add(new Matrix(new double[][]{new double[]{1.0d}}));
+            ans[4].add(new Matrix(new double[][]{new double[]{1.0d}}));
+            ansi[1] = (ansi[1] + 1 < answ[1].length ? ansi[1] + 1 : ansi[1]);
             for (int x = 0; x < 6; ++x)
             {
                if (x != 0 && x != 4)
                {
-                  ans[x].append(new Matrix(0.0d));
+                  ans[x].add(new Matrix(new double[][]{new double[]{0.0d}}));
                }
             }
          }
-         else if (answ[2].getd(ansi[2]) == (double) i)
+         else if (answ[2][ansi[2]] == i)
          {
-            ans[0].append(new Matrix(1.0d));
-            ans[5].append(new Matrix(1.0d));
-            ansi[2] = (ansi[2] + 1 < answ[2].size() ? ansi[2] + 1 : ansi[2]);
+            ans[0].add(new Matrix(new double[][]{new double[]{1.0d}}));
+            ans[5].add(new Matrix(new double[][]{new double[]{1.0d}}));
+            ansi[2] = (ansi[2] + 1 < answ[2].length ? ansi[2] + 1 : ansi[2]);
             for (int x = 0; x < 6; ++x)
             {
                if (x != 0 && x != 5)
                {
-                  ans[x].append(new Matrix(0.0d));
+                  ans[x].add(new Matrix(new double[][]{new double[]{0.0d}}));
                }
             }
          }
-         else if (answ[3].getd(ansi[3]) == (double) i)
+         else if (answ[3][ansi[3]] == i)
          {
-            ans[1].append(new Matrix(1.0d));
-            ans[3].append(new Matrix(1.0d));
-            ansi[3] = (ansi[3] + 1 < answ[3].size() ? ansi[3] + 1 : ansi[3]);
+            ans[1].add(new Matrix(new double[][]{new double[]{1.0d}}));
+            ans[3].add(new Matrix(new double[][]{new double[]{1.0d}}));
+            ansi[3] = (ansi[3] + 1 < answ[3].length ? ansi[3] + 1 : ansi[3]);
             for (int x = 0; x < 6; ++x)
             {
                if (x != 1 && x != 3)
                {
-                  ans[x].append(new Matrix(0.0d));
+                  ans[x].add(new Matrix(new double[][]{new double[]{0.0d}}));
                }
             }
          }
-         else if (answ[4].getd(ansi[4]) == (double) i)
+         else if (answ[4][ansi[4]] == i)
          {
-            ans[1].append(new Matrix(1.0d));
-            ans[4].append(new Matrix(1.0d));
-            ansi[4] = (ansi[4] + 1 < answ[4].size() ? ansi[4] + 1 : ansi[4]);
+            ans[1].add(new Matrix(new double[][]{new double[]{1.0d}}));
+            ans[4].add(new Matrix(new double[][]{new double[]{1.0d}}));
+            ansi[4] = (ansi[4] + 1 < answ[4].length ? ansi[4] + 1 : ansi[4]);
             for (int x = 0; x < 6; ++x)
             {
                if (x != 1 && x != 4)
                {
-                  ans[x].append(new Matrix(0.0d));
+                  ans[x].add(new Matrix(new double[][]{new double[]{0.0d}}));
                }
             }
          }
-         else if (answ[5].getd(ansi[5]) == (double) i)
+         else if (answ[5][ansi[5]] == i)
          {
-            ans[1].append(new Matrix(1.0d));
-            ans[5].append(new Matrix(1.0d));
-            ansi[5] = (ansi[5] + 1 < answ[5].size() ? ansi[5] + 1 : ansi[5]);
+            ans[1].add(new Matrix(new double[][]{new double[]{1.0d}}));
+            ans[5].add(new Matrix(new double[][]{new double[]{1.0d}}));
+            ansi[5] = (ansi[5] + 1 < answ[5].length ? ansi[5] + 1 : ansi[5]);
             for (int x = 0; x < 6; ++x)
             {
                if (x != 1 && x != 5)
                {
-                  ans[x].append(new Matrix(0.0d));
+                  ans[x].add(new Matrix(new double[][]{new double[]{0.0d}}));
                }
             }
          }
-         else if (answ[6].getd(ansi[6]) == (double) i)
+         else if (answ[6][ansi[6]] == (double) i)
          {
-            ans[2].append(new Matrix(1.0d));
-            ans[3].append(new Matrix(1.0d));
-            ansi[6] = (ansi[6] + 1 < answ[6].size() ? ansi[6] + 1 : ansi[6]);
+            ans[2].add(new Matrix(new double[][]{new double[]{1.0d}}));
+            ans[3].add(new Matrix(new double[][]{new double[]{1.0d}}));
+            ansi[6] = (ansi[6] + 1 < answ[6].length ? ansi[6] + 1 : ansi[6]);
             for (int x = 0; x < 6; ++x)
             {
                if (x != 2 && x != 3)
                {
-                  ans[x].append(new Matrix(0.0d));
+                  ans[x].add(new Matrix(new double[][]{new double[]{0.0d}}));
                }
             }
          }
-         else if (answ[7].getd(ansi[7]) == (double) i)
+         else if (answ[7][ansi[7]] == (double) i)
          {
-            ans[2].append(new Matrix(1.0d));
-            ans[4].append(new Matrix(1.0d));
-            ansi[7] = (ansi[7] + 1 < answ[7].size() ? ansi[7] + 1 : ansi[7]);
+            ans[2].add(new Matrix(new double[][]{new double[]{1.0d}}));
+            ans[4].add(new Matrix(new double[][]{new double[]{1.0d}}));
+            ansi[7] = (ansi[7] + 1 < answ[7].length ? ansi[7] + 1 : ansi[7]);
             for (int x = 0; x < 6; ++x)
             {
                if (x != 2 && x != 4)
                {
-                  ans[x].append(new Matrix(0.0d));
+                  ans[x].add(new Matrix(new double[][]{new double[]{0.0d}}));
                }
             }
          }
-         else if (answ[8].getd(ansi[8]) == (double) i)
+         else if (answ[8][ansi[8]] == (double) i)
          {
-            ans[2].append(new Matrix(1.0d));
-            ans[5].append(new Matrix(1.0d));
-            ansi[8] = (ansi[8] + 1 < answ[8].size() ? ansi[8] + 1 : ansi[8]);
+            ans[2].add(new Matrix(new double[][]{new double[]{1.0d}}));
+            ans[5].add(new Matrix(new double[][]{new double[]{1.0d}}));
+            ansi[8] = (ansi[8] + 1 < answ[8].length ? ansi[8] + 1 : ansi[8]);
             for (int x = 0; x < 6; ++x)
             {
                if (x != 2 && x != 5)
                {
-                  ans[x].append(new Matrix(0.0d));
+                  ans[x].add(new Matrix(new double[][]{new double[]{0.0d}}));
                }
             }
          }
       }
       for (int i = 0; i < 852; ++i)
       {
-         ans[7].append(new Matrix());
+         ans[7].add(new Matrix(9, 1));
+
          for (int n = 0; n < 9; ++n)
          {
-            if (answ[9].getd(i) == (double) n)
+            if (answ[9][i] == n)
             {
-               ans[7].getm(i).append(1.0d);
-            }
-            else
-            {
-               ans[7].getm(i).append(0.0d);
+               ((Matrix) ans[7].get(i)).set(n, 0, 1.0d);
             }
          }
       }
@@ -185,64 +198,31 @@ public final class NNTrain
          int l = 0;
          for (int i = 0; i < answ[a].size(); ++i) {
             for (; l < (int)Math.floor(answ[a].getd(i)); ++l) {
-               ans[a].append(new Matrix(0.0d));
+               ans[a].add(new Matrix(0.0d));
             }
-            ans[a].append(new Matrix(1.0d));
+            ans[a].add(new Matrix(1.0d));
             l = ans[a].size();
          }
          while (l < Data.data.size()) {
-            ans[a].append(new Matrix(0.0d));
+            ans[a].add(new Matrix(0.0d));
             ++l;
          }
       }
       for (int i = 0; i < answ[9].size(); ++i) {
-         ans[9].append(new Matrix());
+         ans[9].add(new Matrix());
          for (int n = 0; n < 9; ++n) {
             if (answ[9].getd(i) == (double)n) {
-               ans[9].getm(i).append(1.0d);
+               ans[9].getm(i).add(1.0d);
             } else {
-               ans[9].getm(i).append(0.0d);
+               ans[9].getm(i).add(0.0d);
             }
          }
       }*/
 
-      // BELOW IS THE CODE FOR FINDING OPTIMAL ETAS - DO NOT CHANGE
-      /*double[] optietas = new double[9];
-      int es = 25;
-      int bs = 15;
-      for (int n = 0; n < 9; ++n) {
-         NNs[n] = new NeuralNetwork()
-               .Input(9)
-               .Feedforward(inner)
-               .Output(1)
-               .Build(eta,
-                     lambda,
-                     ct,
-                     at,
-                     it,
-                     rt);
-
-         Optimizer op = new Optimizer(NNs[n], Data.data, ans[n]);
-         System.out.format("Optimizing eta for %d...\n", n, answ[n].size());
-         op.setLambda(lambda);
-         op.setBatchsize(batchsize);
-         op.Eta(0.1, 2.0, 1, true);
-         NNs[n].setEta(op.getEta());
-         System.out.format("Optimal eta: %.3f\n", op.getEta());
-         optietas[n] = op.getEta();
-
-         //System.out.format("Optimizing lambda for %d...\n", n, answ[n].size());
-         //op.Lambda(0.001, 1.0, 3, true);
-         //NNs[n] = new NeuralNetwork().Load(op.getCurrent());
-         //System.out.format("Optimal lambda: %.3f\n", op.getLambda());
-
-         //NNs[n].save("NN"+n+".json", false);
-      }*/
-
-      double[] optietas = {4.35, 3.40, 5.00, 4.30, 3.35, 5.10};
       for (int n = 0; n < 6; ++n)
       {
-         NNs[n] = NeuralNetwork.LoadFromFile("NN"+n+".json");
+         NNs[n] = new NeuralNetwork(9, it, rt, ct, new Layer[]{new Layer(inner, at), new Layer(1, at)});
+         //NNs[n] = NeuralNetwork.LoadFromFile("NN"+n+".json");
       }
 
       NNs[7] = new NeuralNetwork(6, it, rt, ct, new Layer[]{new Layer(inner, at), new Layer(9, at)});
@@ -252,56 +232,50 @@ public final class NNTrain
       {
          for (int n = 0; n < 6; ++n)
          {
-            System.out.format("Before training: %.5f\n", NNs[n].evaluate(Data.data, ans[n]));
-            double score = NNs[n].evaluate(Data.data, ans[n]);
+            System.out.format("Before training: %.5f\n", NNs[n].evaluate(alData, ans[n]));
+            double score = NNs[n].evaluate(alData, ans[n]);
             String best = NNs[n].json();
             int attempt = 0;
             while (attempt < 50)
             {
-               NNs[n].train(Data.data, ans[n], 1, batchsize, eta, lambda);
-               while (NNs[n].evaluate(Data.data, ans[n]) < score)
+               NNs[n].train(alData, ans[n], 1, batchsize, eta, lambda);
+               while (NNs[n].evaluate(alData, ans[n]) < score)
                {
                   best = NNs[n].json();
-                  score = NNs[n].evaluate(Data.data, ans[n]);
-                  NNs[n].train(Data.data, ans[n], 1, batchsize, eta, lambda);
+                  score = NNs[n].evaluate(alData, ans[n]);
+                  NNs[n].train(alData, ans[n], 1, batchsize, eta, lambda);
                   attempt = 0;
                }
                ++attempt;
             }
-            NNs[n].Load(best);
-            System.out.format("After training: %.5f\n", NNs[n].evaluate(Data.data, ans[n]));
+            NNs[n] = NeuralNetwork.Load(best);
+            System.out.format("After training: %.5f\n", NNs[n].evaluate(alData, ans[n]));
             NNs[n].save("NN" + n + ".json", false);
          }
 
-         Matrix fdata = new Matrix();
+         ArrayList<Matrix> fdata = new ArrayList<>();
          for (int i = 0; i < 852; ++i)
          {
-            fdata.append(new Matrix());
+            fdata.add(new Matrix(6, 1));
             for (int n = 0; n < 6; ++n)
             {
-               fdata.getm(i).append(NNs[n].feedforward(Data.data.getm(i)).getd(0));
+               fdata.get(i).set(n, 0, NNs[n].feedforward(alData.get(i)).get(0, 0));
             }
          }
 
-         /*System.out.format("BEFORE TRAINING: %.3f\n", NNs[7].evaluate(fdata, ans[9]));
-         Optimizer op = new Optimizer(NNs[7], fdata, ans[9]);
-         op.setLambda(0.1d);
-         op.setBatchsize(batchsize);
-         op.Eta(0.01, 5.0, 1, true);
-         NNs[7].setEta(op.getEta());*/
          int score = 0;
          for (int i = 0; i < 852; ++i)
          {
-            Matrix fa = NNs[7].feedforward(fdata.getm(i));
+            Matrix fa = NNs[7].feedforward(fdata.get(i));
             int max = 0;
             for (int n = 1; n < 6; ++n)
             {
-               if (fa.getd(n) > fa.getd(max))
+               if (fa.get(n, 0) > fa.get(max, 0))
                {
                   max = n;
                }
             }
-            if ((double) max == answ[9].getd(i))
+            if (max == answ[9][i])
             {
                ++score;
             }
@@ -324,16 +298,16 @@ public final class NNTrain
                nscore = 0;
                for (int i = 0; i < 852; ++i)
                {
-                  Matrix fa = NNs[7].feedforward(fdata.getm(i));
+                  Matrix fa = NNs[7].feedforward(fdata.get(i));
                   int max = 0;
                   for (int n = 1; n < 6; ++n)
                   {
-                     if (fa.getd(n) > fa.getd(max))
+                     if (fa.get(n, 0) > fa.get(max, 0))
                      {
                         max = n;
                      }
                   }
-                  if ((double) max == answ[9].getd(i))
+                  if (max == answ[9][i])
                   {
                      ++nscore;
                   }
@@ -341,7 +315,7 @@ public final class NNTrain
             }
             ++attempt;
          }
-         NNs[7].Load(best);
+         NNs[7] = NeuralNetwork.Load(best);
          System.out.format("AFTER TRAINING: %.3f\n", NNs[7].evaluate(fdata, ans[7]));
          NNs[7].save("NN7.json", false);
 

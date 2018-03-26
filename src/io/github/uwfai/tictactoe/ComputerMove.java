@@ -64,7 +64,7 @@ public class ComputerMove
          }
          catch (Exception e)
          {
-
+            e.printStackTrace();
          }
       }
    }
@@ -295,24 +295,24 @@ public class ComputerMove
 
    public void smartComputerMove(Player player,Board board,int level)
    {
-      Matrix bm = new Matrix();
+      Matrix bm = new Matrix(9, 1);
       for (int x = 0; x < 3; ++x) {
          for (int y = 0; y < 3; ++y) {
             Player p = board.getValueAtSquare(x, y);
-            bm.append(p == Player.X ? 1 : (p == Player.O ? -1 : 0));
+            bm.set((y*3)+x, 0, p == Player.X ? 1 : (p == Player.O ? -1 : 0));
          }
       }
 
       double[] all = {
-        NN0.feedforward(bm).getd(0),
-        NN1.feedforward(bm).getd(0),
-        NN2.feedforward(bm).getd(0),
-        NN3.feedforward(bm).getd(0),
-        NN4.feedforward(bm).getd(0),
-        NN5.feedforward(bm).getd(0),
-        NN6.feedforward(bm).getd(0),
-        NN7.feedforward(bm).getd(0),
-        NN8.feedforward(bm).getd(0)
+        NN0.feedforward(bm).get(0, 0),
+        NN1.feedforward(bm).get(0, 0),
+        NN2.feedforward(bm).get(0, 0),
+        NN3.feedforward(bm).get(0, 0),
+        NN4.feedforward(bm).get(0, 0),
+        NN5.feedforward(bm).get(0, 0),
+        NN6.feedforward(bm).get(0, 0),
+        NN7.feedforward(bm).get(0, 0),
+        NN8.feedforward(bm).get(0, 0)
       };
 
       int h = 0;
