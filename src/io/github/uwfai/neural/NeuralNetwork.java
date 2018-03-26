@@ -42,10 +42,13 @@ public class NeuralNetwork {
 	* vaues. This is primarily for our testing purposes to determine the accuracy of our network.
 	*/
 	
-	public Matrix feedforward(Matrix activations, List<Matrix> zs, List<Matrix> as) {
-		for (Layer layer : this.layers) {
+	public Matrix feedforward(Matrix activations, List<Matrix> zs, List<Matrix> as)
+   {
+		for (Layer layer : this.layers)
+		{
 			activations = layer.feedforward(activations, zs, as);
 		}
+
 		return activations;
 	}
 	
@@ -55,7 +58,8 @@ public class NeuralNetwork {
 	* layer matrix.
 	*/
 	
-	public Matrix feedforward(Matrix activations) {
+	public Matrix feedforward(Matrix activations)
+   {
 		return this.feedforward(activations, new ArrayList<>(), new ArrayList<>());
 	}
 	
@@ -65,39 +69,42 @@ public class NeuralNetwork {
 	* this 'gradient' to be used by the parent function, normally the 'batch' function.
 	*/
 	
-	public List<Matrix>[] set(Matrix data, Matrix answers) {
+	public ArrayList<Matrix>[] set(Matrix data, Matrix answers)
+   {
 		ArrayList<Matrix> zs = new ArrayList<>();
 		ArrayList<Matrix> as = new ArrayList<>();
 		Matrix rs = this.feedforward(data, zs, as);
 		ArrayList<Matrix> error = new ArrayList<>();
 
-		error.add(0, cost.derivative(answers, rs));
+		error.add(0, cost.derivative(answers, as.get(as.size()-1)));
 		
-		for (int layer = this.layers.size()-1; layer > 0; --layer) {
-			Matrix adjust = new Matrix(this.layers.get(layer).dimensions());
+		for (int layer = this.layers.size()-1; layer > 0; --layer)
+		{
+			error.set(0, error.get(0).multiply(this.layers.get(layer).getActivation().derivative(zs.get(layer))));
 
-			for (int neuron = 0; neuron < this.layers.get(layer).size(); ++neuron) {
-				adjust.set(neuron, 1, this.layers.get(layer).activationDerivative(zs.get(layer).get(neuron, 1)));
-			}
-
-			error.set(0, error.get(0).multiply(adjust));
-
-			error.add(0, error.get(0).multiply(this.layers.get(layer).getWeights()).sum(1));
+			error.add(0, this.layers.get(layer).getWeights().transpose().dot(error.get(0)).sum(1));
 		}
 
 		ArrayList<Matrix> nabla_w = new ArrayList<>();
-		for (int layer = 1; layer < this.layers.size(); ++layer) {
-			nabla_w.add(new Matrix(this.layers.get(layer).dimensions()));
-			for (int neuron = 0; neuron < this.layers.get(layer).size(); ++neuron) {
-				for (int weight = 0; weight < this.layers.get(layer).getWeights().getRows(); ++weight) {
-					nabla_w.get(nabla_w.size()-1).set(weight, neuron,
-						as.get(layer-1).get(weight, neuron)*error.get(layer).get(neuron, 1)
-					);
+
+		for (int layer = 1; layer < this.layers.size(); ++layer)
+		{
+			nabla_w.add(new Matrix(this.layers.get(layer).getWeights().getRows(), this.layers.get(layer).getWeights().getColumns()));
+
+			for (int neuron = 0; neuron < this.layers.get(layer).size(); ++neuron)
+			{
+				for (int weight = 0; weight < this.layers.get(layer).getWeights().getColumns(); ++weight)
+				{
+					nabla_w.get(nabla_w.size()-1).set(neuron, weight, as.get(layer-1).get(weight, 0)* error.get(layer).get(neuron, 0));
 				}
 			}
 		}
 
-		return new ArrayList<Matrix>[]{ error, nabla_w };
+		ArrayList[] ret = new ArrayList[2];
+      ret[0] = error;
+      ret[1] = nabla_w;
+
+      return ret;
 	}
 	
 	/*
@@ -110,20 +117,32 @@ public class NeuralNetwork {
 	public void batch(List<Matrix> data, List<Matrix> answers, int datasize, double eta, double lambda) {
 		List<Matrix> nabla_b = new ArrayList<>();
 		List<Matrix> nabla_w = new ArrayList<>();
-		for (int set = 0; set < data.size(); ++set) {
+
+		for (int set = 0; set < data.size(); ++set)
+		{
 			List<Matrix>[] sgradient = this.set(data.get(set), answers.get(set));
 
-			if (set == 0) {
+			if (set == 0)
+			{
 				nabla_b = sgradient[0];
 				nabla_w = sgradient[1];
-			} else {
-				for (int nabla = 0; nabla < sgradient[0].size(); ++nabla) {
+			}
+			else
+			{
+				for (int nabla = 0; nabla < sgradient[0].size(); ++nabla)
+				{
 					nabla_b.set(nabla, nabla_b.get(nabla).add(sgradient[0].get(nabla)));
+				}
+
+				for (int nabla = 0; nabla < sgradient[1].size(); ++nabla)
+				{
 					nabla_w.set(nabla, nabla_w.get(nabla).add(sgradient[1].get(nabla)));
 				}
 			}
 		}
-		for (int layer = 1; layer < this.layers.size(); ++layer) {
+
+		for (int layer = 1; layer < this.layers.size(); ++layer)
+		{
 			Matrix w = this.layers.get(layer).getWeights();
 			Matrix nb = nabla_b.get(layer).multiply(nabla_b.get(layer).shape().fill(eta/(double)datasize));
          Matrix nw = nabla_w.get(layer-1).multiply(nabla_w.get(layer-1).shape().fill(eta/(double)datasize)).add(this.regularization.derivative(w).multiply(w.shape().fill(lambda*eta/(double)datasize)));
@@ -139,13 +158,17 @@ public class NeuralNetwork {
 	* test data.
 	*/
 	
-	public void epoch(List<Matrix> data, List<Matrix> answers, int batchsize, double eta, double lambda) {
+	public void epoch(List<Matrix> data, List<Matrix> answers, int batchsize, double eta, double lambda)
+   {
 		int batches = (int)Math.floor((double)data.size()/(double)batchsize);
-		for (int batch = 0; batch < batches; ++batch) {
+
+		for (int batch = 0; batch < batches; ++batch)
+		{
 			List<Matrix> bdata = new ArrayList<>();
 			List<Matrix> badata = new ArrayList<>();
 			
-			for (int i = 0; i < batchsize; ++i) {
+			for (int i = 0; i < batchsize; ++i)
+			{
 				bdata.add(new Matrix(data.get((batch*batchsize)+i)));
 				badata.add(new Matrix(answers.get((batch*batchsize)+i)));
 			}
@@ -159,12 +182,15 @@ public class NeuralNetwork {
 	* performs all of the above and gives us how accurate our network is without too much effort.
 	*/
 	
-	public void train(List<Matrix> data, List<Matrix> answers, int epochs, int batchsize, double eta, double lambda) {
-		for (int epoch = 0; epoch < epochs; ++epoch) {
+	public void train(List<Matrix> data, List<Matrix> answers, int epochs, int batchsize, double eta, double lambda)
+   {
+		for (int epoch = 0; epoch < epochs; ++epoch)
+		{
 			List<Matrix> tdata = new ArrayList<>(data);
 			List<Matrix> tadata = new ArrayList<>(answers);
 			
-			for (int i = 0; i < tdata.size(); ++i) {
+			for (int i = 0; i < tdata.size(); ++i)
+			{
 				int index1 = (int)Math.floor(this.gen.nextDouble()*tdata.size());
 				int index2 = (int)Math.floor(this.gen.nextDouble()*tdata.size());
 				Matrix swap = new Matrix(tdata.get(index1));
@@ -179,42 +205,59 @@ public class NeuralNetwork {
 		}
 	}
 
-	public double evaluate(List<Matrix> data, List<Matrix> answers) {
+	public double evaluate(List<Matrix> data, List<Matrix> answers)
+   {
       double total = 0.0d;
-      for (int i = 0; i < data.size(); ++i) {
+
+      for (int i = 0; i < data.size(); ++i)
+      {
          Matrix a = this.feedforward(data.get(i));
          total += this.cost.cost(answers.get(i), a);
       }
+
       double reg = 0.0d;
-      for (int l = 0; l < this.layers.size(); ++l) {
+
+      for (int l = 0; l < this.layers.size(); ++l)
+      {
 	      total += this.regularization.regularize(this.layers.get(l).getWeights());
       }
+
       return (total/data.size())+reg;
    }
 
-	public String json() {
+	public String json()
+   {
       Gson gson = new Gson();
       return gson.toJson(this);
 	}
 
-	public void save(String path, boolean append) {
+	public void save(String path, boolean append)
+   {
 		try
 		{
 			File f = new File(path);
-         if (!f.exists()) {
+
+         if (!f.exists())
+         {
             f.createNewFile();
          }
+
 			FileWriter fw = new FileWriter(f, append);
          BufferedWriter bw = new BufferedWriter(fw);
+
          bw.write(this.json());
+
          bw.close();
          fw.close();
-		} catch (Exception e) {
+		}
+		catch (Exception e)
+      {
 
 		}
 	}
 	
-	public NeuralNetwork(long seed, int inputSize, InitializationFunction initialization, RegularizationFunction regularization, CostFunction cost, Layer[] layers) {
+	public NeuralNetwork(long seed, int inputSize, InitializationFunction initialization, RegularizationFunction regularization, CostFunction cost, Layer[] layers)
+	{
 		this.gen.setSeed(seed);
 
 		this.cost = cost;
@@ -223,22 +266,26 @@ public class NeuralNetwork {
 		this.layers = new ArrayList<>(Arrays.asList(layers));
 
 		int totalSize = 0;
-		for (Layer layer : this.layers) {
+		for (Layer layer : this.layers)
+		{
 			totalSize += layer.size();
 		}
 
-		this.layers.get(0).initialize(initialization, new int[]{inputSize, 1}, gen, totalSize);
+		this.layers.get(0).initialize(initialization, new int[]{1, inputSize}, gen, totalSize);
 
-		for (int layer = 1; layer < this.layers.size(); ++layer) {
+		for (int layer = 1; layer < this.layers.size(); ++layer)
+		{
 			this.layers.get(layer).initialize(initialization, this.layers.get(layer-1).dimensions(), gen, totalSize);
 		}
 	}
 	
-	public NeuralNetwork(int inputSize, InitializationFunction initialization, RegularizationFunction regularization, CostFunction cost, Layer[] layers) {
+	public NeuralNetwork(int inputSize, InitializationFunction initialization, RegularizationFunction regularization, CostFunction cost, Layer[] layers)
+	{
 		this(0L, inputSize, initialization, regularization, cost, layers);
 	}
 
-	public static NeuralNetwork Load(String JSON) {
+	public static NeuralNetwork Load(String JSON)
+	{
       Gson gson = new Gson();
       return ((NeuralNetwork)gson.fromJson(JSON, new TypeToken<NeuralNetwork>(){}.getType()));
    }
@@ -250,15 +297,21 @@ public class NeuralNetwork {
 		return new String(encoded, encoding);
 	}
 
-   public static NeuralNetwork LoadFromFile(String FILE) {
+   public static NeuralNetwork LoadFromFile(String FILE)
+   {
 	   Gson gson = new Gson();
 	   String JSON = "";
-	   try {
+
+	   try
+	   {
 		   JSON = readFile(FILE, Charset.defaultCharset());
-	   } catch (IOException e) {
+	   }
+	   catch (IOException e)
+	   {
 			System.err.format("Failed to load NeuralNetwork from file: %s\n", e.getMessage());
 		   e.printStackTrace();
 	   }
+
 	   return ((NeuralNetwork)gson.fromJson(JSON, new TypeToken<NeuralNetwork>(){}.getType()));
    }
 }

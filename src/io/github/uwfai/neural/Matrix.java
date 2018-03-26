@@ -1,8 +1,5 @@
 package io.github.uwfai.neural;
 
-import com.google.gson.internal.LinkedTreeMap;
-
-import java.util.ArrayList;
 import java.util.function.Function;
 
 public class Matrix {
@@ -12,9 +9,26 @@ public class Matrix {
 	private double[][] matrix;
 
 	public Matrix(double[][] values) {
-		this.rows = values.length;
-		this.columns = values[0].length;
-		matrix = values;
+		this(values, false);
+	}
+
+	public Matrix(double[][] values, boolean transpose) {
+		if (transpose)
+		{
+			this.rows = values[0].length;
+			this.columns = values.length;
+			matrix = new double[values[0].length][values.length];
+
+			for (int row = 0; row < values.length; ++row) {
+				for (int col = 0; col < values[0].length; ++col) {
+					matrix[col][row] = values[row][col];
+				}
+			}
+		} else {
+			this.rows = values.length;
+			this.columns = values[0].length;
+			matrix = values;
+		}
 	}
 
 	public Matrix(int rows, int columns) {
@@ -58,11 +72,13 @@ public class Matrix {
 	}
 	
 	public final void set(int row, int column, double value) {
-		this.matrix[row][column] = value;
+		this.matrix[row]
+				[column] = value;
 	}
 
 	public final double get(int row, int column) {
-		return matrix[row][column];
+		return matrix[row]
+				[column];
 	}
 	
 	public Matrix shape() {
@@ -80,7 +96,7 @@ public class Matrix {
 
 			if (row < rows - 1)
 			{
-				ret = ret.concat(",\n ");
+				ret = ret.concat("\n ");
 			}
 		}
 		return ret.concat("]");
@@ -103,18 +119,19 @@ public class Matrix {
 	}
 	
 	public final Matrix dot(Matrix other) throws RuntimeException {
-		if (getRows() != other.getRows() || getColumns() != other.getColumns()) {
+		if (getColumns() != other.getRows()) {
 			throw new RuntimeException(String.format("Cannot produce cross product of matrices due to conflicting sizes: %dx%d vs %dx%d", getRows(), getColumns(), other.getRows(), other.getColumns()));
 		}
 
 		Matrix result = new Matrix(rows, other.getColumns());
 
 		for (int row = 0; row < rows; ++row) {
-			for (int column = 0; column < columns; ++column) {
+			for (int column = 0; column < other.getColumns(); ++column) {
 				double sum = 0.0d;
 
 				for (int multiply = 0; multiply < columns; ++multiply) {
-					sum += get(row, multiply) * other.get(column, multiply);
+					sum += get(row, multiply)
+							* other.get(multiply, column);
 				}
 
 				result.set(row, column, sum);
@@ -173,7 +190,7 @@ public class Matrix {
 
       for (int row = 0; row < rows; ++row) {
       	for (int column = 0; column < columns; ++column) {
-      		result.set(row, column, get(row, column) * other.get(row, column));
+      		result.set(row, column, this.get(row, column) * other.get(row, column));
 	      }
       }
 
@@ -185,7 +202,7 @@ public class Matrix {
 
       for (int row = 0; row < rows; ++row) {
       	for (int column = 0; column < columns; ++column) {
-      		set(row, column, function.apply(get(row, column)));
+      		result.set(row, column, function.apply(this.get(row, column)));
 	      }
       }
 
@@ -195,7 +212,7 @@ public class Matrix {
 	public Matrix fill(double value) {
 		for (int row = 0; row < rows; ++row) {
 			for (int column = 0; column < columns; ++column) {
-				set(row, column, value);
+				this.set(row, column, value);
 			}
 		}
 
@@ -250,6 +267,21 @@ public class Matrix {
 		}
 
 		return result;
+   }
+
+   public Matrix transpose()
+   {
+	   Matrix result = new Matrix(columns, rows);
+
+	   for (int row = 0; row < rows; ++row)
+	   {
+		   for (int column = 0; column < columns; ++column)
+		   {
+			   result.set(column, row, get(row, column));
+		   }
+	   }
+
+	   return result;
    }
 
 	private void checkIfSimilar(Matrix other) throws RuntimeException {

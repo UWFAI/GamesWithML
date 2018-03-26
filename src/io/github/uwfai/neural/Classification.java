@@ -1,18 +1,17 @@
 package io.github.uwfai.neural;
 
-import com.sun.org.apache.regexp.internal.RE;
 import io.github.uwfai.neural.function.ActivationFunction;
 import io.github.uwfai.neural.function.CostFunction;
 import io.github.uwfai.neural.function.InitializationFunction;
 import io.github.uwfai.neural.function.RegularizationFunction;
 import io.github.uwfai.neural.layer.Layer;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import javax.imageio.ImageIO;
-import java.io.File;
 
 public class Classification {
 	public static void main(String[] args) {
@@ -67,9 +66,12 @@ public class Classification {
 			}
 			try {
 				File output = new File("train-"+i+".png");
-				if (!output.exists()) {
+
+				if (!output.exists())
+				{
 					output.createNewFile();
 				}
+
 				ImageIO.write(bi, "png", output);
 			} catch (Exception e) {
 				e.printStackTrace();
